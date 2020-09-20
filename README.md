@@ -1,8 +1,44 @@
 # DBpedia Lookup
 
-There is a discussion thread on the DBpedia forums for questions and suggestions concerning this app here: https://forum.dbpedia.org/t/new-dbpedia-lookup-application/607
+There is a discussion thread on the DBpedia forums for questions and suggestions concerning this app and service here: https://forum.dbpedia.org/t/new-dbpedia-lookup-application/607
 
-This application is an improved and DBpedia Databus compatible version of the DBpedia Lookup Service. It is supposed to replace the old lookup service at https://github.com/dbpedia/lookup. It is best run using docker-compose. The process of creating an running instance of the Lookup can be outlined as follows:
+DBpedia Lookup is a generic entity retrieval service for RDF data. It can be configured to index any RDF data and provice a retrieval services that resolves keywords to entity identifiers.
+
+This repository contains preset projects to run the DBpedia Lookup with the DBpedia Latest Core release. This can be achieved either by building the index on your machine or by loading a pre-built index from the DBpedia Databus [here](https://databus.dbpedia.org/jan/dbpedia-lookup/index/)
+
+## Deployment
+
+Running the Virtuoso SPARQL Endpoint Quickstart requires Docker and Docker Compose installed on your system. If you do not have those installed, please follow the install instructions for [here](https://docs.docker.com/engine/install/) and [here](https://docs.docker.com/compose/install/).
+
+Download any of the preset projects from the example folder, navigate to the preset folder and run 
+
+```
+docker-compose up
+```
+
+If you are using a pre-built index preset (recommended), please download the respective index structure from the DBpedia Databus [here](https://databus.dbpedia.org/jan/dbpedia-lookup/index/) to your preset folder and unpack it (use either `index_autocomplete.tar.gz` or `index_keyword.tar.gz` depending on the loaded file). **Only use one index file - do not mix multiple indexes together.**
+
+```
+tar -zxvf index_autocomplete.tar.gz
+```
+
+Make sure that the folder containing the pre-built index is labelled `/index` as the docker container will mount this folder as a volume to load the index structure. Once the index is unpacked, your preset folder should look like this:
+
+```
+example_folder/
+--- app-config.yml
+--- docker-compose.yml
+--- index/
+--- template.xsl
+```
+To start the retrieval service run
+```
+docker-compose up
+```
+
+## Architecture
+
+This application is an improved and DBpedia Databus compatible version of the DBpedia Lookup Service. It is best run using docker-compose. The process of creating an running instance of the Lookup can be outlined as follows:
 
 * The user supplies an **Application Configuration** and a **Databus Collection**
 * The DBpedia Download docker contaniner loads the RDF data specified in the collection
@@ -81,7 +117,7 @@ The index folder has to contain the downloaded and unpacked index files. Then ru
 version: "3.0"
 services:
   download:
-    image: dbpedia/minimal-download-client:latest
+    image: dbpedia/dbpedia-databus-collection-downloader:latest
     environment:
       COLLECTION_URI: https://databus.dbpedia.org/jan/collections/lookup
       TARGET_DIR: /root/data
