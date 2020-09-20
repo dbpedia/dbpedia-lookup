@@ -10,7 +10,7 @@ This application is an improved and DBpedia Databus compatible version of the DB
 * The Lookup container selects indexable key-value pairs via SPARQL queries specified in the **Application Configuration**
 * A Java Servlet is started on a Tomcat Server that accepts queries and executes searches on the Lucene Index as specified in the **Application Configuration**
 
-![alt text](https://github.com/dbpedia/lookup-application/blob/dev/overview.jpg "Lookup Overview")
+![alt text](https://github.com/dbpedia/dbpedia-lookup/blob/dev/overview.jpg "Lookup Overview")
 
 ## How to run it
 
