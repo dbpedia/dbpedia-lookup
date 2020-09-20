@@ -20,6 +20,7 @@ If you are using a pre-built index preset (recommended), please download the res
 
 ```
 tar -zxvf index_autocomplete.tar.gz
+mv ./index_autocomplete ./index
 ```
 
 Make sure that the folder containing the pre-built index is labelled `/index` as the docker container will mount this folder as a volume to load the index structure. Once the index is unpacked, your preset folder should look like this:
