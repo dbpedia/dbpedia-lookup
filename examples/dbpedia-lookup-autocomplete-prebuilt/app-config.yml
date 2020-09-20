@@ -39,7 +39,7 @@ indexConfig:
         } GROUP BY ?resource
 queryConfig:
   exactMatchBoost: 0
-  prefixMatchBoost: 3
+  prefixMatchBoost: 1
   fuzzyMatchBoost: 0
   fuzzyEditDistance: 0
   fuzzyPrefixLength: 0
