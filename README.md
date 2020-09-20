@@ -49,69 +49,6 @@ This application is an improved and DBpedia Databus compatible version of the DB
 
 ![alt text](https://github.com/dbpedia/dbpedia-lookup/blob/master/overview.jpg "Lookup Overview")
 
-## How to run it
-
-Adjust the docker-compose and application configuration - then run docker-compose up:
-
-```version: "3.0"
-docker-compose up
-```
-
-### Building the docker image
-
-YOu can use the docker image on Dockerhub. Though, if you want to build the image youself you can clone the git repository
-
-```version: "3.0"
-git clone https://github.com/dbpedia/lookup-application.git
-```
-
-and build the docker image by running
-
-```version: "3.0"
-docker build -t lookup .
-```
-
-The configuration provided in this repository can be used to replicate the DBpedia Lookup index.
-
-## Using a Pre-Built Index (Recommended)
-
-Building the index for the DBpedia Lookup takes some time (5-7 hours). However, you can reuse already existing indices. The latest pre-built indices of the DBpedia Lookup can be downloaded from here: https://databus.dbpedia.org/jan/dbpedia-lookup/index/ - or by running:
-
-```
-wget http://akswnc7.informatik.uni-leipzig.de/dav/dbpedia-lookup/index/2020.05.29/index.tar.gz
-tar -zxvf index.tar.gz
-```
-
-Download and unpack the index on your local machine and start the application in INDEX_MODE *NONE* with the provided `app-conifg.yml` and `template.xsl` and the following modifed `docker-compose.yml`:
-
-```
-version: "3.0"
-services:
-  dbpedia-lookup:
-    image: dbpedia/lookup-application:latest
-    ports:
-      - 9273:8080
-    environment:
-      - CONFIG_PATH=/root/app-config.yml
-      - INDEX_MODE=NONE
-    volumes: 
-      - ./app-config.yml:/root/app-config.yml
-      - ./template.xsl:/root/template.xsl
-      - ./index:/root/index/
-      - ./data:/root/data/
-```
-
-Make sure to pass the downloaded index files to the container via the mounted index folder. The file structure of your setup should look like this:
-
-```
-example_folder/
---- app-config.yml
---- docker-compose.yml
---- index/
---- template.xsl
-```
-The index folder has to contain the downloaded and unpacked index files. Then run the application with `docker-compose up`.
-
 ## Docker Compose
 
 ```
