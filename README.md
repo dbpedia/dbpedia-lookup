@@ -1,4 +1,4 @@
-# Lookup Application
+# DBpedia Lookup
 
 There is a discussion thread on the DBpedia forums for questions and suggestions concerning this app here: https://forum.dbpedia.org/t/new-dbpedia-lookup-application/607
 
