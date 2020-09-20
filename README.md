@@ -62,7 +62,7 @@ services:
     volumes:
       - ./data:/root/data
   dbpedia-lookup:
-    image: dbpedia/lookup-application:latest
+    image: dbpedia/dbpedia-lookup:latest
     ports:
       - 9273:8080
     environment:
