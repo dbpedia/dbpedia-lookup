@@ -12,6 +12,8 @@ indexConfig:
       query: >
         SELECT ?resource ?label WHERE {
           ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label.
+          FILTER NOT EXISTS { ?resource <http://dbpedia.org/ontology/wikiPageRedirects> ?redirectedResource . }
+          FILTER(!strstarts(str(?resource), "http://dbpedia.org/resource/Category:")).
         }
     - fieldName: redirectlabel
       resourceName: resource
@@ -20,6 +22,7 @@ indexConfig:
         SELECT ?resource ?redirectlabel WHERE {
           ?redirectedResource <http://dbpedia.org/ontology/wikiPageRedirects> ?resource .
           ?redirectedResource <http://www.w3.org/2000/01/rdf-schema#label> ?redirectlabel.
+          FILTER(!strstarts(str(?resource), "http://dbpedia.org/resource/Category:")).
         }
     - fieldName: typeName
       resourceName: resource
@@ -27,6 +30,8 @@ indexConfig:
       query: >
         SELECT ?resource (REPLACE(STR(?type), "(.*)(/|#)", "") AS ?typeName) WHERE{
           ?resource a ?type.
+          FILTER NOT EXISTS { ?resource <http://dbpedia.org/ontology/wikiPageRedirects> ?redirectedResource . }
+          FILTER(!strstarts(str(?resource), "http://dbpedia.org/resource/Category:")).
           FILTER(strstarts(str(?type), "http://dbpedia.org/ontology")).
         }
     - fieldName: refCount
@@ -35,6 +40,8 @@ indexConfig:
       query: >
         SELECT ?resource (COUNT(?s) as ?refCount) WHERE {
           ?s ?p ?resource .
+          FILTER NOT EXISTS { ?resource <http://dbpedia.org/ontology/wikiPageRedirects> ?redirectedResource . }
+          FILTER(!strstarts(str(?resource), "http://dbpedia.org/resource/Category:")).
           FILTER(!isLiteral(?resource))
         } GROUP BY ?resource
 queryConfig:
@@ -53,9 +60,11 @@ queryConfig:
     - fieldName: label
       weight: 10
       queryByDefault: true
+      tokenize: false
     - fieldName: redirectlabel
       weight: 8
       queryByDefault: true
+      tokenize: false
     - fieldName: typeName
       weight: 0.1
       required: true
