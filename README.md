@@ -16,7 +16,7 @@ Download any of the preset projects from the example folder, navigate to the pre
 docker-compose up
 ```
 
-If you are using a pre-built index preset (recommended), please download the respective index structure from the DBpedia Databus [here](https://databus.dbpedia.org/jan/dbpedia-lookup/index/) to your preset folder and unpack it (use either `index_autocomplete.tar.gz` or `index_keyword.tar.gz` depending on the loaded file). **Only use one index file - do not mix multiple indexes together.**
+If you are using a pre-built index preset (recommended), please download the respective index structure from the DBpedia Databus [here](https://databus.dbpedia.org/jan/dbpedia-lookup/index/) to your preset folder and unpack it (use either `index_autocomplete.tar.gz` or `index_keyword.tar.gz` depending on the loaded file) before you run the container. **Only use one index file - do not mix multiple indexes together.**
 
 ```
 tar -zxvf index_autocomplete.tar.gz
@@ -32,7 +32,7 @@ example_folder/
 --- index/
 --- template.xsl
 ```
-To start the retrieval service run
+To start the retrieval service, run
 ```
 docker-compose up
 ```
