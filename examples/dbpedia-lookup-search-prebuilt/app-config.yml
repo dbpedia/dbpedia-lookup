@@ -1,0 +1,91 @@
+version: "1.0"
+indexConfig:
+  indexPath: /root/index
+  indexMode: NONE
+  cleanIndex: true
+  cacheSize: 1000000
+  commitInterval: 1000000
+  indexFields:
+    - fieldName: label
+      resourceName: resource
+      query: >
+        SELECT ?resource ?label WHERE {
+          ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label.
+        }
+    - fieldName: redirectlabel
+      resourceName: resource
+      query: >
+        SELECT ?resource ?redirectlabel WHERE {
+          ?redirectedResource <http://dbpedia.org/ontology/wikiPageRedirects> ?resource .
+          ?redirectedResource <http://www.w3.org/2000/01/rdf-schema#label> ?redirectlabel.
+        }
+    - fieldName: comment
+      resourceName: resource
+      query: >
+        SELECT ?resource ?comment WHERE {
+          ?resource <http://www.w3.org/2000/01/rdf-schema#comment> ?comment.
+        }
+    - fieldName: typeName
+      resourceName: resource
+      query: >
+        SELECT ?resource (REPLACE(STR(?type), "(.*)(/|#)", "") AS ?typeName) WHERE{
+          ?resource a ?type.
+          FILTER(strstarts(str(?type), "http://dbpedia.org/ontology")).
+        }
+    - fieldName: type
+      resourceName: resource
+      fieldType : stored
+      query: >
+        SELECT DISTINCT ?resource ?type WHERE{
+          ?resource a ?type.
+          FILTER(strstarts(str(?type), "http://dbpedia.org/ontology")).
+        }
+    - fieldName: category
+      fieldType: stored
+      resourceName: resource
+      query: >
+        SELECT ?resource ?category WHERE {
+          ?resource <http://purl.org/dc/terms/subject> ?c .
+          ?c <http://www.w3.org/2000/01/rdf-schema#label> ?category .
+        }
+    - fieldName: refCount
+      resourceName: resource
+      fieldType: numeric
+      query: >
+        SELECT ?resource (COUNT(?s) as ?refCount) WHERE {
+          ?s ?p ?resource .
+          FILTER(!isLiteral(?resource))
+        } GROUP BY ?resource
+queryConfig:
+  exactMatchBoost: 5
+  prefixMatchBoost: 2
+  fuzzyMatchBoost: 1
+  fuzzyEditDistance: 2
+  fuzzyPrefixLength: 2
+  boostFormula: sqrt(refCount+1)
+  maxResults: 100
+  format: XML
+  formatTemplate: /root/template.xsl
+  minRelevanceScore: 0.1
+  queryFields:
+    - fieldName: label
+      weight: 10
+      highlight: true
+      queryByDefault: true
+    - fieldName: redirectlabel
+      weight: 10
+      highlight: true
+      queryByDefault: true
+    - fieldName: comment
+      weight: 0.5
+      highlight: true
+      queryByDefault: true
+      allowPartialMatch: true
+    - fieldName: typeName
+      weight: 0.1
+      highlight: false
+      required: true
+      exact: true
+      allowPartialMatch: true
+      aliases:
+        - QueryClass

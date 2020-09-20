@@ -1,0 +1,65 @@
+version: "1.0"
+indexConfig:
+  indexPath: /root/index
+  indexMode: BUILD_DISK
+  cleanIndex: true
+  cacheSize: 1000000
+  commitInterval: 1000000
+  indexFields:
+    - fieldName: label
+      resourceName: resource
+      fieldType: string
+      query: >
+        SELECT ?resource ?label WHERE {
+          ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label.
+        }
+    - fieldName: redirectlabel
+      resourceName: resource
+      fieldType: string
+      query: >
+        SELECT ?resource ?redirectlabel WHERE {
+          ?redirectedResource <http://dbpedia.org/ontology/wikiPageRedirects> ?resource .
+          ?redirectedResource <http://www.w3.org/2000/01/rdf-schema#label> ?redirectlabel.
+        }
+    - fieldName: typeName
+      resourceName: resource
+      fieldType: string
+      query: >
+        SELECT ?resource (REPLACE(STR(?type), "(.*)(/|#)", "") AS ?typeName) WHERE{
+          ?resource a ?type.
+          FILTER(strstarts(str(?type), "http://dbpedia.org/ontology")).
+        }
+    - fieldName: refCount
+      resourceName: resource
+      fieldType: numeric
+      query: >
+        SELECT ?resource (COUNT(?s) as ?refCount) WHERE {
+          ?s ?p ?resource .
+          FILTER(!isLiteral(?resource))
+        } GROUP BY ?resource
+queryConfig:
+  exactMatchBoost: 0
+  prefixMatchBoost: 3
+  fuzzyMatchBoost: 0
+  fuzzyEditDistance: 0
+  fuzzyPrefixLength: 0
+  boostFormula: sqrt(refCount+1)
+  maxResults: 100
+  maxResultsCap: 100
+  format: XML
+  formatTemplate: /root/template.xsl
+  minRelevanceScore: 0.1
+  queryFields:
+    - fieldName: label
+      weight: 10
+      queryByDefault: true
+    - fieldName: redirectlabel
+      weight: 8
+      queryByDefault: true
+    - fieldName: typeName
+      weight: 0.1
+      required: true
+      exact: true
+      allowPartialMatch: true
+      aliases:
+        - QueryClass
