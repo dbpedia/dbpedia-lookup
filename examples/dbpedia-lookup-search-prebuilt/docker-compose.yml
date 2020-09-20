@@ -1,7 +1,7 @@
 version: "3.0"
 services:
   dbpedia-lookup-search:
-    image: lookup:latest
+    image: dbpedia/dbpedia-lookup:latest
     ports:
       - 9273:8080
     environment:
