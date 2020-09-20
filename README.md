@@ -36,7 +36,7 @@ docker build -t lookup .
 
 The configuration provided in this repository can be used to replicate the DBpedia Lookup index.
 
-## Using a Pre-Built Index
+## Using a Pre-Built Index (Recommended)
 
 Building the index for the DBpedia Lookup takes some time (5-7 hours). However, you can reuse already existing indices. The latest pre-built indices of the DBpedia Lookup can be downloaded from here: https://databus.dbpedia.org/jan/dbpedia-lookup/index/ - or by running:
 
