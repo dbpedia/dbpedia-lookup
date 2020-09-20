@@ -6,11 +6,11 @@
     <Result>
       <Label><xsl:value-of select="label" /></Label>
       <URI><xsl:value-of select="resource" /></URI>
-      <Description><xsl:value-of select="comment" /></Description>
       <Classes>
         <xsl:for-each select="typeName">
           <Class>
-            <Label><xsl:value-of select="." /></Label>
+            <xsl:variable name="s1" select="replace(.,'([A-Z][a-z]+)','$1 ')" />
+            <Label><xsl:value-of select="substring($s1, 1, string-length($s1) - 1)" /></Label>
             <URI>http://dbpedia.org/ontology/<xsl:value-of select="." /></URI>
           </Class>
         </xsl:for-each>
