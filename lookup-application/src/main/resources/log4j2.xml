@@ -17,7 +17,7 @@
       	<Delete basePath="${logdir}" maxDepth="2">
           <IfFileName glob="*/localhost*.log" />
           <IfAny>
-   			<IfLastModified age="7d" />
+   			<IfLastModified age="30d" />
             <IfAccumulatedFileSize exceeds="5 GB" />
           </IfAny>
         </Delete>
