@@ -12,11 +12,16 @@
         fileName="${logdir}/localhost.log"
         filePattern="${logdir}/localhost.%d{yyyy-MM-dd}-%i.log">
       <PatternLayout pattern="${layout}"/>
-      <Policies>
-        <TimeBasedTriggeringPolicy />
-        <SizeBasedTriggeringPolicy size="1 MB" />
-      </Policies>
-      <DefaultRolloverStrategy max="100" />
+      <CronTriggeringPolicy schedule="0 0 0 * * ?"/>
+      <DefaultRolloverStrategy>
+      	<Delete basePath="${logdir}" maxDepth="2">
+          <IfFileName glob="*/localhost*.log" />
+          <IfAny>
+   			<IfLastModified age="7d" />
+            <IfAccumulatedFileSize exceeds="5 GB" />
+          </IfAny>
+        </Delete>
+      </DefaultRolloverStrategy>
     </RollingFile>
 
   </Appenders>
