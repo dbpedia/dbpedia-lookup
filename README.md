@@ -16,7 +16,7 @@ Download any of the preset projects from the example folder, navigate to the pre
 docker-compose up
 ```
 
-If you are using a pre-built index preset (recommended), please download the respective index structure from the DBpedia Databus [here](https://databus.dbpedia.org/jan/dbpedia-lookup/index/) to your preset folder and unpack it (use either `index_autocomplete.tar.gz` or `index_keyword.tar.gz` depending on the loaded file) before you run the container. **Only use one index file - do not mix multiple indexes together.**
+If you are using a pre-built index preset (recommended), please download the respective index structure from the DBpedia Databus [here](https://databus.dbpedia.org/jan/dbpedia-lookup/index/) to your preset folder and unpack it (use either `index_autocomplete.tar.gz` or `index_keyword.tar.gz` depending on the loaded file) before you run the container. **Only use one index file - do not mix multiple indices together.**
 
 ```
 tar -zxvf index_autocomplete.tar.gz
@@ -69,7 +69,6 @@ services:
       - DATAPATH=/root/data/
       - TDBPATH=/root/tdb/
       - CONFIG_PATH=/root/app-config.yml
-      - INDEX_MODE=BUILD_DISK
       - CLEAN=true
     volumes: 
       - ./app-config.yml:/root/app-config.yml
@@ -89,11 +88,7 @@ The following environment variables of the lookup application can be set in the 
 * **DATA_PATH** The folder relative to the docker container root where the data can be found. The data should be provided by the host system via docker volume. It also makes sense to let the download and lookup services share the data volume so the lookup service can find the data once the download is finished.
 * **TDB_PATH** If you select the INDEX_MODE *BUILD_DISK* or *INDEX_DISK* the lookup will use an on-disk TDB2 database. You can specifiy the path of this data structure to save it via docker volume. This can save you the trouble of rebuilding the database each time you run the docker.
 * **CONFIG_PATH** The application configuration is provided via docker volume. If you prefer to change the default path of the application configuration (even thought there is really no reason to do so) you can tell the lookup application where to find the configuration file using the environment variable *CONFIG_PATH*
-* **INDEX_MODE** This environment variable should be set to one of: *BUILD_MEM*, *BUILD_DISK*, *INDEX_DISC*, *NONE*. Defaults to *BUILD_MEM*.
-  * **BUILD_MEM** Uses an in-memory graph structure to load and query the data. Faster than *BUILD_DISK* but requires more RAM
-  * **BUILD_DISK** Uses an on-disk graph structure (TDB2) to load and query the data. This on-disk database can be saved to the host system via docker volume.
-  * **INDEX_DISK** Uses an already existing on-disk graph structure (TDB2) to query the indexable key-value pairs. An already existing database has to be present. The loading step will be skipped.
-  * **NONE** Completely skips the indexing path and starts up the tomcat. This can be used to quickly reload the lookup with a modified application (query) configuration.
+
 * **CLEAN** If CLEAN is set to true the indexer will create a new index from scratch and extend an already existing index otherwise.
 
 The lookup container will wait for the download client to finish and then index all files in the configured data path. Once the index is running, you can add more files to this folder to add them to the index. Note that this will trigger a short (few seconds) downtime when the container restarts the tomcat after reindexing.
@@ -108,6 +103,7 @@ This is the example YAML Configuration that will be present in the docker contai
 version: "1.0"
 indexConfig:
   indexPath: /root/index
+  indexMode: BUILD_DISK
   cacheSize: 1000000
   commitInterval: 10000000
   indexFields:
@@ -190,6 +186,12 @@ The Configuration is split into the index configuration and the query configurat
 ### Index Configuration
 
 **indexPath** The path relative to the container root where the lucene index will be located
+
+* **indexMode** This environment variable should be set to one of: *BUILD_MEM*, *BUILD_DISK*, *INDEX_DISC*, *NONE*. Defaults to *BUILD_MEM*.
+  * **BUILD_MEM** Uses an in-memory graph structure to load and query the data. Faster than *BUILD_DISK* but requires more RAM
+  * **BUILD_DISK** Uses an on-disk graph structure (TDB2) to load and query the data. This on-disk database can be saved to the host system via docker volume.
+  * **INDEX_DISK** Uses an already existing on-disk graph structure (TDB2) to query the indexable key-value pairs. An already existing database has to be present. The loading step will be skipped.
+  * **NONE** Completely skips the indexing path and starts up the tomcat. This can be used to quickly reload the lookup with a modified application (query) configuration.
 
 **cacheSize** The maximum number of documents that can be buffered by the indexer before a flush is required. A higher number will consume more RAM but also lead to faster indexing.
 
