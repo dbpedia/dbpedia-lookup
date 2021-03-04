@@ -6,6 +6,12 @@ DBpedia Lookup is a generic entity retrieval service for RDF data. It can be con
 
 This repository contains preset projects to run the DBpedia Lookup with the DBpedia Latest Core release. This can be achieved either by building the index on your machine or by loading a pre-built index from the DBpedia Databus [here](https://databus.dbpedia.org/jan/dbpedia-lookup/index/)
 
+## Demo
+
+You can find a deployment of the generic entity retrieval service equipped with the DBpedia Lookup index at [https://lookup.dbpedia.org](https://lookup.dbpedia.org).
+
+Another application example can be found on the [DBpedia Databus website](https://databus.dbpedia.org/system/search). In this case the Lookup service provides a search over the RDF-based website content.
+
 ## Deployment
 
 Running the Virtuoso SPARQL Endpoint Quickstart requires Docker and Docker Compose installed on your system. If you do not have those installed, please follow the install instructions for [here](https://docs.docker.com/engine/install/) and [here](https://docs.docker.com/compose/install/).
