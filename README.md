@@ -370,7 +370,7 @@ This search will be run on all default fields (`label`, `comment`, `category`) *
 
 Also note that the configurations **required** and **exact** are both needed to achieve this sort of query behaviour. Setting the `typeName` field to only **required** will allow Documents with a fuzzy match on the `typeName` field to appear in the result set. Setting the field to only **exact** won't exlcude Documents from the result set but simply assign them a lower score.
 
-The field configuration can be altered in the query itself by using the dynamic search parameters:
+The field configuration can be altered in the query itself by using the dynamic search parameters (see [Dynamic Query Parameters](https://github.com/dbpedia/dbpedia-lookup/blob/master/README.md#dynamic-query-parameters)):
 
 [https://lookup.dbpedia.org/api/search?query=Berlin&typeName=City&typeNameRequired=true](https://lookup.dbpedia.org/api/search?query=Berlin&typeName=City&typeNameRequired=true)
 
