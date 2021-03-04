@@ -351,35 +351,33 @@ http://localhost:9273/lookup-application/api/search?query=YOUR_QUERY
 
 
 #### Example 1: Searching on a Specific Field
-```
-http://localhost:9273/lookup-application/api/search?label=Berlin
-```
+
+https://lookup.dbpedia.org/api/search?label=Berlin
 
 This search will only be run on the "label" field with the term "Berlin"
 
 #### Example 2: Searching on all 'QueryByDefault' Fields
-```
-http://localhost:9273/lookup-application/api/search?query=Berlin
-```
+
+https://lookup.dbpedia.org/api/search?query=Berlin
+
 This search will only be run on all fields that are configured to be queried by default (see Query Configuration). In the provided configuration this will perform a search over the `label`, `comment` and `category` field. The `typeName` field will be ignored.
 
 #### Example 3: Including Non-Default Fields in the Search
-```
-http://localhost:9273/lookup-application/api/search?query=Berlin&typeName=City
-```
+
+https://lookup.dbpedia.org/api/search?query=Berlin&typeName=City
+
 This search will be run on all default fields (`label`, `comment`, `category`) *and* the `typeName` field. Note that the `typeName` field is configured to only accept **exact** matches *and* that it is set to **required**. This means that all documents will be omitted that do not have an exact match on 'City' as their `typeName`. 
 
 Also note that the configurations **required** and **exact** are both needed to achieve this sort of query behaviour. Setting the `typeName` field to only **required** will allow Documents with a fuzzy match on the `typeName` field to appear in the result set. Setting the field to only **exact** won't exlcude Documents from the result set but simply assign them a lower score.
 
 The field configuration can be altered in the query itself by using the dynamic search parameters:
-```
-http://localhost:9273/lookup-application/api/search?query=Berlin&typeName=City&typeNameRequired=true
-```
+
+[https://lookup.dbpedia.org/api/search?query=Berlin&typeName=City&typeNameRequired=true](https://lookup.dbpedia.org/api/search?query=Berlin&typeName=City&typeNameRequired=true)
 
 #### Example 4: Overriding Queries for Specific Fields
-```
-http://localhost:9273/lookup-application/api/search?query=Berlin&label=Leipzig
-```
+
+[https://lookup.dbpedia.org/api/search?query=Berlin&label=Leipzig](https://lookup.dbpedia.org/api/search?query=Berlin&label=Leipzig)
+
 
 This will search all fields for the term 'Berlin' except for the `label` field. The `label` field will be searched for the term 'Leipzig' instead.
 
