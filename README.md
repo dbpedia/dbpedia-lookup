@@ -75,7 +75,6 @@ services:
       - DATAPATH=/root/data/
       - TDBPATH=/root/tdb/
       - CONFIG_PATH=/root/app-config.yml
-      - CLEAN=true
     volumes: 
       - ./app-config.yml:/root/app-config.yml
       - ./template.xsl:/root/template.xsl
@@ -95,7 +94,6 @@ The following environment variables of the lookup application can be set in the 
 * **TDB_PATH** If you select the INDEX_MODE *BUILD_DISK* or *INDEX_DISK* the lookup will use an on-disk TDB2 database. You can specifiy the path of this data structure to save it via docker volume. This can save you the trouble of rebuilding the database each time you run the docker.
 * **CONFIG_PATH** The application configuration is provided via docker volume. If you prefer to change the default path of the application configuration (even thought there is really no reason to do so) you can tell the lookup application where to find the configuration file using the environment variable *CONFIG_PATH*
 
-* **CLEAN** If CLEAN is set to true the indexer will create a new index from scratch and extend an already existing index otherwise.
 
 The lookup container will wait for the download client to finish and then index all files in the configured data path. Once the index is running, you can add more files to this folder to add them to the index. Note that this will trigger a short (few seconds) downtime when the container restarts the tomcat after reindexing.
 
@@ -110,6 +108,7 @@ version: "1.0"
 indexConfig:
   indexPath: /root/index
   indexMode: BUILD_DISK
+  cleanIndex: true
   cacheSize: 1000000
   commitInterval: 10000000
   indexFields:
@@ -198,6 +197,8 @@ The Configuration is split into the index configuration and the query configurat
   * **BUILD_DISK** Uses an on-disk graph structure (TDB2) to load and query the data. This on-disk database can be saved to the host system via docker volume.
   * **INDEX_DISK** Uses an already existing on-disk graph structure (TDB2) to query the indexable key-value pairs. An already existing database has to be present. The loading step will be skipped.
   * **NONE** Completely skips the indexing path and starts up the tomcat. This can be used to quickly reload the lookup with a modified application (query) configuration.
+
+* **cleanIndex** If cleanIndex is set to true the indexer will create a new index from scratch. It will try to extend an already existing index otherwise.
 
 **cacheSize** The maximum number of documents that can be buffered by the indexer before a flush is required. A higher number will consume more RAM but also lead to faster indexing.
 
