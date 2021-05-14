@@ -10,14 +10,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.ParseException;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -96,7 +88,6 @@ public class IndexMain {
 		String dataPath = DEFAULT_DATA_PATH;
 		String configPath = DEFAULT_CONFIG_PATH;
 		String tdbPath = DEFAULT_TDB_PATH;
-		boolean cleanIndex = false;
 		
 		Options options = new Options();
 		options.addOption(CLI_OPT_DATA_PATH_LONG, CLI_OPT_DATA_PATH_LONG, true, CLI_OPT_DATA_PATH_HELP);
@@ -222,27 +213,6 @@ public class IndexMain {
 		}	
 	}
 	
-	private static String query(String endpoint, String query) throws ParseException, IOException {
-		
-		HttpClient client = HttpClientBuilder.create().build();
-		
-		String body = "default-graph-uri=&format=application%2Fsparql-results%2Bjson&query=" + query;
-		
-		HttpEntity entity = new ByteArrayEntity(body.getBytes("UTF-8"));
-		HttpPost request = new HttpPost(endpoint);
-		request.setEntity(entity);
-		request.setHeader("Content-type", "application/x-www-form-urlencoded");
-		// request.addHeader("Accept",  accept);
-		HttpResponse response = client.execute(request);
-		HttpEntity responseEntity = response.getEntity();
-		
-		if(responseEntity != null) {
-		    return EntityUtils.toString(responseEntity);
-		}
-		return null;
-
-	}
-
 
 	/**
 	 * Creates the index by building a data set in memory.
@@ -363,13 +333,7 @@ public class IndexMain {
 
 	private static void indexData(Dataset dataset, LuceneLookupIndexer lookupIndexer, LookupConfig xmlConfig) {
 			
-		for(IndexField indexFieldConfig : xmlConfig.getIndexConfig().getIndexFields()) {	
-			
-			
-		}
-		
-		
-		
+	
 		
 		try (RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
 			
