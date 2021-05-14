@@ -196,9 +196,12 @@ The Configuration is split into the index configuration and the query configurat
   * **BUILD_MEM** Uses an in-memory graph structure to load and query the data. Faster than *BUILD_DISK* but requires more RAM
   * **BUILD_DISK** Uses an on-disk graph structure (TDB2) to load and query the data. This on-disk database can be saved to the host system via docker volume.
   * **INDEX_DISK** Uses an already existing on-disk graph structure (TDB2) to query the indexable key-value pairs. An already existing database has to be present. The loading step will be skipped.
+  * **INDEX_SPARQL** The user needs to supply a value for **sparqlEndpoint**. The indexing process then uses a public SPARQL endpoint instead of the local TDB2 database.
   * **NONE** Completely skips the indexing path and starts up the tomcat. This can be used to quickly reload the lookup with a modified application (query) configuration.
 
 * **cleanIndex** If cleanIndex is set to true the indexer will create a new index from scratch. It will try to extend an already existing index otherwise.
+
+**sparqlEndpoint** The SPARQL endpoint to use with the **INDEX_SPARQL** indexing mode.
 
 **cacheSize** The maximum number of documents that can be buffered by the indexer before a flush is required. A higher number will consume more RAM but also lead to faster indexing.
 
