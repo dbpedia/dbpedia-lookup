@@ -62,7 +62,7 @@ public class LuceneLookupIndexer {
 	 * @param updateInterval Max amount of updates before a commit
 	 * @param cacheSize Max cache size
 	 */
-	public LuceneLookupIndexer(IndexConfig indexConfig, Logger logger, boolean cleanIndex) {
+	public LuceneLookupIndexer(IndexConfig indexConfig, Logger logger) {
 		
 		this.logger = logger;
 		
@@ -87,7 +87,7 @@ public class LuceneLookupIndexer {
 			
 			searcher = new IndexSearcher(DirectoryReader.open(index));
 			
-			if(cleanIndex) {
+			if(indexConfig.isCleanIndex()) {
 				clearIndex();
 			} 
 			

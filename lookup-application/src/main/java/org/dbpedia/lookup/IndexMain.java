@@ -10,9 +10,19 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.ParseException;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.ResultSet;
@@ -39,6 +49,7 @@ public class IndexMain {
 		BUILD_MEM,
 		BUILD_DISK,
 		INDEX_DISK,
+		INDEX_SPARQL,
 		NONE
 	}
 
@@ -131,10 +142,14 @@ public class IndexMain {
 			logger.info("Configuration loaded...");
 			logger.info("=====================================================================");
 		
-			mode = Enum.valueOf(IndexMode.class, xmlConfig.getIndexConfig().getIndexMode());
-			cleanIndex = xmlConfig.getIndexConfig().isCleanIndex();
-			
-			logger.info("CLEAN INDEX:\t\t" + cleanIndex);
+			try {
+				mode = Enum.valueOf(IndexMode.class, xmlConfig.getIndexConfig().getIndexMode());
+			} catch(Exception e) {
+				logger.info("Index mode not specified, index mode has been set to NONE.");
+				mode = IndexMode.NONE;
+			}
+		
+			logger.info("CLEAN INDEX:\t\t" + xmlConfig.getIndexConfig().isCleanIndex());
 			logger.info("INDEX MODE:\t\t" + mode);
 			
 			// Log the configuration file
@@ -144,16 +159,19 @@ public class IndexMain {
 			switch(mode) {	
 				case BUILD_MEM:
 					logger.info("Index mode BUILD_MEM has been selected.");
-					buildMem(dataPath, cleanIndex, xmlConfig);
+					buildMem(dataPath, xmlConfig);
 					break;
 				case BUILD_DISK:
 					logger.info("Index mode BUILD_DISK has been selected.");
-					buildDisk(dataPath, tdbPath, cleanIndex, xmlConfig);
+					buildDisk(dataPath, tdbPath, xmlConfig);
 					break;
 				case INDEX_DISK:
 					logger.info("Index mode INDEX_DISK has been selected.");
-					indexDisk(tdbPath, cleanIndex, xmlConfig);
+					indexDisk(tdbPath, xmlConfig);
 					break;
+				case INDEX_SPARQL:
+					logger.info("Index mode INDEX_SPARQL has been selected.");
+					indexSparql(xmlConfig);
 				case NONE:
 					logger.info("Index mode NONE has been selected. Done!");
 					break;
@@ -183,6 +201,49 @@ public class IndexMain {
 	}
 
 	
+	private static void indexSparql(LookupConfig xmlConfig) {
+		
+		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig.getIndexConfig(), logger);
+		
+		for(IndexField indexFieldConfig : xmlConfig.getIndexConfig().getIndexFields()) {	
+			
+			logger.info("=====================================================================");
+			logger.info("Indexing path for field '" + indexFieldConfig.getFieldName() + "' and resource '" + indexFieldConfig.getResourceName() + "'");
+			logger.info("=====================================================================");
+				
+			 try (QueryExecution qexec = QueryExecutionFactory.sparqlService(xmlConfig.getIndexConfig().getSparqlEndpoint(),
+					 indexFieldConfig.getQuery())) {
+			    ResultSet results = qexec.execSelect();
+				
+			    lookupIndexer.indexResult(results, indexFieldConfig);
+				lookupIndexer.commit();
+			 }
+
+		}	
+	}
+	
+	private static String query(String endpoint, String query) throws ParseException, IOException {
+		
+		HttpClient client = HttpClientBuilder.create().build();
+		
+		String body = "default-graph-uri=&format=application%2Fsparql-results%2Bjson&query=" + query;
+		
+		HttpEntity entity = new ByteArrayEntity(body.getBytes("UTF-8"));
+		HttpPost request = new HttpPost(endpoint);
+		request.setEntity(entity);
+		request.setHeader("Content-type", "application/x-www-form-urlencoded");
+		// request.addHeader("Accept",  accept);
+		HttpResponse response = client.execute(request);
+		HttpEntity responseEntity = response.getEntity();
+		
+		if(responseEntity != null) {
+		    return EntityUtils.toString(responseEntity);
+		}
+		return null;
+
+	}
+
+
 	/**
 	 * Creates the index by building a data set in memory.
 	 * Once the data set is build, the indexable key-value pairs are fetched via SPARQL queries
@@ -191,7 +252,7 @@ public class IndexMain {
 	 * @param cleanIndex indicates whether to clean the Lucene index before indexing
 	 * @param xmlConfig the configuration file used for indexing
 	 */
-	private static void buildMem(String dataPath, boolean cleanIndex, LookupConfig xmlConfig) {
+	private static void buildMem(String dataPath, LookupConfig xmlConfig) {
 		Dataset dataset = DatasetFactory.create(); 
 			
 		File[] filesToLoad = getFilesToLoad(dataPath);
@@ -212,7 +273,7 @@ public class IndexMain {
 			}
 		}
 		
-		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig.getIndexConfig(), logger, cleanIndex);
+		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig.getIndexConfig(), logger);
 		indexData(dataset, lookupIndexer, xmlConfig);
 	}
 
@@ -225,7 +286,7 @@ public class IndexMain {
 	 * @param cleanIndex indicates whether to clean the Lucene index before indexing
 	 * @param xmlConfig the configuration file used for indexing
 	 */
-	private static void buildDisk(String dataPath, String tdbPath, boolean cleanIndex, LookupConfig xmlConfig) {
+	private static void buildDisk(String dataPath, String tdbPath, LookupConfig xmlConfig) {
 		
 		// Connect to TDB2 graph on disk
 		DatasetGraph datasetGraph = DatabaseMgr.connectDatasetGraph(tdbPath);
@@ -275,7 +336,7 @@ public class IndexMain {
 		}
 		
 		// Do the indexing
-		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig.getIndexConfig(), logger, cleanIndex);
+		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig.getIndexConfig(), logger);
 		indexData(DatasetFactory.wrap(datasetGraph), lookupIndexer, xmlConfig);
 	}
 	
@@ -287,7 +348,7 @@ public class IndexMain {
 	 * @param cleanIndex indicates whether to clean the Lucene index before indexing
 	 * @param xmlConfig the configuration file used for indexing
 	 */
-	private static void indexDisk(String tdbPath, boolean cleanIndex, LookupConfig xmlConfig) {
+	private static void indexDisk(String tdbPath, LookupConfig xmlConfig) {
 			
 		logger.info("Connecting to TDB2 data set graph...");
 		
@@ -295,12 +356,20 @@ public class IndexMain {
 		DatasetGraph datasetGraph = DatabaseMgr.connectDatasetGraph(tdbPath);
 		
 		// Do the indexing
-		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig.getIndexConfig(), logger, cleanIndex);
+		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig.getIndexConfig(), logger);
 		indexData(DatasetFactory.wrap(datasetGraph), lookupIndexer, xmlConfig);
 	}
 
 
 	private static void indexData(Dataset dataset, LuceneLookupIndexer lookupIndexer, LookupConfig xmlConfig) {
+			
+		for(IndexField indexFieldConfig : xmlConfig.getIndexConfig().getIndexFields()) {	
+			
+			
+		}
+		
+		
+		
 		
 		try (RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
 			
@@ -310,6 +379,8 @@ public class IndexMain {
 				logger.info("Indexing path for field '" + indexFieldConfig.getFieldName() + "' and resource '" + indexFieldConfig.getResourceName() + "'");
 				logger.info("=====================================================================");
 					
+				
+				
 				Txn.executeRead(conn, ()-> {
 					Query query = QueryFactory.create(indexFieldConfig.getQuery());
 					ResultSet result = conn.query(query).execSelect();
@@ -326,6 +397,8 @@ public class IndexMain {
 						    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(elapsed))
 						));
 				});
+				
+				
 				
 				lookupIndexer.commit();
 				dataset.close();

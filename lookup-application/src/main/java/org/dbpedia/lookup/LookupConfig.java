@@ -92,6 +92,8 @@ public class LookupConfig {
 		
 		private String indexMode;
 		
+		private String sparqlEndpoint;
+		
 		private boolean cleanIndex;
 		
 		private int cacheSize;
@@ -144,6 +146,14 @@ public class LookupConfig {
 
 		public void setCleanIndex(boolean cleanIndex) {
 			this.cleanIndex = cleanIndex;
+		}
+
+		public String getSparqlEndpoint() {
+			return sparqlEndpoint;
+		}
+
+		public void setSparqlEndpoint(String sparqlEndpoint) {
+			this.sparqlEndpoint = sparqlEndpoint;
 		}
 	}
 	
