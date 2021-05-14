@@ -201,6 +201,8 @@ The Configuration is split into the index configuration and the query configurat
 
 * **cleanIndex** If cleanIndex is set to true the indexer will create a new index from scratch. It will try to extend an already existing index otherwise.
 
+**sparqlEndpoint** The SPARQL endpoint to use with the **INDEX_SPARQL** indexing mode.
+
 **cacheSize** The maximum number of documents that can be buffered by the indexer before a flush is required. A higher number will consume more RAM but also lead to faster indexing.
 
 **commitInterval** The amount of updates on the index before changes are commited. Additionally, the commit will invoke garbage collection. More frequent garbage collection (lower values for *commitInterval*) can help prevent a Java Heap Space error that can occur when working with large data sets.
