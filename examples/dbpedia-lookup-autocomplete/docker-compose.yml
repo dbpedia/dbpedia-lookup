@@ -1,7 +1,7 @@
 version: "3.0"
 services:
   download:
-    image: dbpedia/dbpedia-databus-collection-download:latest
+    image: dbpedia/dbpedia-databus-collection-downloader:latest
     environment:
       COLLECTION_URI: https://databus.dbpedia.org/jan/collections/lookup
       TARGET_DIR: /root/data
