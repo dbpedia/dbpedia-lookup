@@ -1,0 +1,17 @@
+version: "1.0"
+indexPath: ./root/index
+indexMode: INDEX_SPARQL
+sparqlEndpoint: https://dbpedia.org/sparql
+cleanIndex: true
+cacheSize: 1000000
+commitInterval: 100
+indexFields:
+  - fieldName: label
+    resourceName: resource
+    fieldType: string
+    query: >
+      SELECT ?resource ?label WHERE {
+        ?resource a <http://dbpedia.org/ontology/City> .
+        ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+        FILTER (LANG(?label) = "en").
+      } LIMIT 1000
