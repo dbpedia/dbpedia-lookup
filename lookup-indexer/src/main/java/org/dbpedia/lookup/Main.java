@@ -38,8 +38,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Main {
 
-	public static final String DEFAULT_CONFIG_PATH = "/root/app-config.yml";
-
 	private static final String CLI_OPT_CONFIG_PATH_LONG = "config";
 
 	private static final String CLI_OPT_CONFIG_PATH_HELP = "The path of the application configuration file.";
@@ -55,10 +53,10 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		long time = System.currentTimeMillis();
 
-		logger =  LoggerFactory.getLogger(Main.class);
+		logger = LoggerFactory.getLogger(Main.class);
 
 		IndexMode mode = IndexMode.BUILD_MEM;
-		String configPath = DEFAULT_CONFIG_PATH;
+		String configPath = null;
 
 		Options options = new Options();
 		options.addOption(CLI_OPT_CONFIG_PATH_LONG, CLI_OPT_CONFIG_PATH_LONG, true, CLI_OPT_CONFIG_PATH_HELP);
@@ -75,6 +73,11 @@ public class Main {
 
 		} catch (org.apache.commons.cli.ParseException e1) {
 			e1.printStackTrace();
+		}
+
+		if (configPath == null) {
+			logger.info("No config file found - exiting.");
+			return;
 		}
 
 		logger.info("=====================================================================");
@@ -170,6 +173,8 @@ public class Main {
 				lookupIndexer.commit();
 			}
 		}
+
+		lookupIndexer.finish();
 	}
 
 	/**
@@ -325,8 +330,8 @@ public class Main {
 				dataset.close();
 			}
 
+			lookupIndexer.finish();
 			lookupIndexer.test();
-
 		}
 	}
 

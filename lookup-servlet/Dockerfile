@@ -7,10 +7,10 @@ RUN java -version
 
 WORKDIR /root/
 
-COPY ./lookup-application/ /root/lookup-application/
-WORKDIR /root/lookup-application/
+COPY ./ /root/lookup/
+WORKDIR /root/lookup/
 RUN export MAVEN_OPTS='-Xmx4096m -Xms1024m'
 RUN mvn install
 
-ENTRYPOINT /bin/bash setup.sh
+ENTRYPOINT /bin/bash run.sh
 

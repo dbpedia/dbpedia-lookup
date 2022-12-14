@@ -1,0 +1,7 @@
+version: "3.0"
+services:
+  lookup-indexer:
+    build: ./
+    volumes:
+      - ../examples/index-config.yml:/root/index-config.yml
+      - ../examples/index:/root/index

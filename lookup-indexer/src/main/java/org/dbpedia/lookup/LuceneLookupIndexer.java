@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.RDFNode;
@@ -21,7 +23,6 @@ import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
@@ -32,16 +33,21 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.slf4j.Logger;
 
-
 public class LuceneLookupIndexer {
+
+	private static String lockFileName = "/write.lock";
 
 	private IndexWriter indexWriter;
 
 	private IndexSearcher searcher;
 
-	private FSDirectory index;
+	private FSDirectory targetDirectory;
 
-	private String filePath;
+	private FSDirectory indexDirectory;
+
+	private String indexPath;
+
+	private String targetPath;
 
 	private IndexConfig indexConfig;
 
@@ -52,53 +58,60 @@ public class LuceneLookupIndexer {
 	private Analyzer analyzer;
 
 	private String lastResource = null;
-	
+
 	private String lastValue = null;
 
-	
 	/**
 	 * Creates a new lucene lookup indexer
-	 * @param filePath File path to use for indexing
+	 * 
+	 * @param filePath       File path to use for indexing
 	 * @param updateInterval Max amount of updates before a commit
-	 * @param cacheSize Max cache size
+	 * @param cacheSize      Max cache size
 	 */
 	public LuceneLookupIndexer(IndexConfig indexConfig, Logger logger) {
-		
+
 		this.logger = logger;
-		
+
 		this.indexConfig = indexConfig;
-		this.filePath = indexConfig.getIndexPath();
-		
-		// Create a document cache to keep documents in between commits to the lucene structure
+		this.targetPath = indexConfig.getIndexPath();
+
+		// Create a document cache to keep documents in between commits to the lucene
+		// structure
 		documentCache = new ConcurrentHashMap<String, Document>();
-			
+
 		// Create a new analyzer for the given index configuration
 		analyzer = createAnalyzer(indexConfig);
-		
+
 		try {
-			// Open the index directory
-			index = FSDirectory.open(Paths.get(filePath));
-			
-			// Create an index writer with index directory and index configuration
-			indexWriter = new IndexWriter(index, createWriterConfig());
-			
-			File file = new File(filePath);
+			// Open the target directory
+			targetDirectory = FSDirectory.open(Paths.get(targetPath));
+
+			if (indexConfig.isCleanIndex()) {
+				String stagingFolderName = "." + UUID.randomUUID().toString();
+
+				indexPath = Paths.get(targetPath).getParent().toString() +
+					File.separator + stagingFolderName;
+				indexDirectory = FSDirectory.open(Paths.get(indexPath));
+
+			} else {
+				indexPath = targetPath;
+				indexDirectory = targetDirectory;
+			}
+
+			File file = new File(indexPath);
 			file.mkdirs();
-			
-			searcher = new IndexSearcher(DirectoryReader.open(index));
-			
-			if(indexConfig.isCleanIndex()) {
-				clearIndex();
-			} 
-			
-		} catch(IndexNotFoundException e) {
+
+			documentCache = new ConcurrentHashMap<String, Document>();
+			indexWriter = new IndexWriter(indexDirectory, createWriterConfig());
+			searcher = new IndexSearcher(DirectoryReader.open(indexDirectory));
+
+		} catch (IndexNotFoundException e) {
 			return;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
 		}
 	}
-
 
 	private IndexWriterConfig createWriterConfig() {
 		IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
@@ -107,75 +120,70 @@ public class LuceneLookupIndexer {
 		return indexWriterConfig;
 	}
 
-
 	private Analyzer createAnalyzer(IndexConfig indexConfig) {
-		
+
 		Map<String, Analyzer> analyzerPerField = new HashMap<String, Analyzer>();
-		
-		for(IndexField field : indexConfig.getIndexFields()) {
-			
+
+		for (IndexField field : indexConfig.getIndexFields()) {
+
 			String fieldType = field.getFieldType();
-			
-			if(fieldType == null) {
+
+			if (fieldType == null) {
 				continue;
-			} 
-			
-			if(fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_STRING)) {
+			}
+
+			if (fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_STRING)) {
 				analyzerPerField.put(field.getFieldName(), new StringPhraseAnalyzer());
 			}
 		}
-		
+
 		Analyzer analyzer = new PerFieldAnalyzerWrapper(new StandardAnalyzer(), analyzerPerField);
 		return analyzer;
 	}
-	
 
 	public void indexResult(ResultSet result, IndexField path) {
-		
+
 		int k = 0;
-		
-		while(result.hasNext()) {
-			
+
+		while (result.hasNext()) {
+
 			QuerySolution entry = result.next();
 			RDFNode resource = entry.get(path.getResourceName());
 			RDFNode value = entry.get(path.getFieldName());
-			
+
 			lastResource = resource.toString();
-			
-			if(value.isLiteral()) {
+
+			if (value.isLiteral()) {
 				lastValue = value.asLiteral().getString();
 			} else {
 				lastValue = value.toString();
 			}
-			
+
 			indexField(lastResource, path, lastValue);
-			
+
 			k++;
-			
-			if(k % indexConfig.getCommitInterval() == 0) {
+
+			if (k % indexConfig.getCommitInterval() == 0) {
 				commit();
 			}
 		}
 	}
 
-
-	
 	public void indexField(String resource, IndexField path, String literal) {
 
 		String field = path.getFieldName();
 		String fieldType = path.getFieldType();
-		
-		if(fieldType != null) {
+
+		if (fieldType != null) {
 			fieldType = fieldType.toLowerCase();
 		} else {
 			fieldType = Constants.CONFIG_FIELD_TYPE_TEXT;
 		}
-		
+
 		try {
 			Document doc = findDocument(resource);
-			
-			
-			switch(fieldType) {
+
+			switch (fieldType) {
 				case Constants.CONFIG_FIELD_TYPE_NUMERIC:
 					long value = Long.parseLong(literal);
 					doc.removeFields(field);
@@ -189,88 +197,89 @@ public class LuceneLookupIndexer {
 					doc.add(new TextField(field, literal, Field.Store.YES));
 					break;
 			}
-			
+
 			indexWriter.updateDocument(new Term(Constants.FIELD_RESOURCE, resource), doc);
-		
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-
 	private Document findDocument(String resource) throws IOException {
 
-		if(documentCache.containsKey(resource)) {
+		if (documentCache.containsKey(resource)) {
 			return documentCache.get(resource);
 		}
-		
+
 		// First try: search the index
 		Document document = getDocumentFromIndex(resource);
 
-		if(document == null) {
+		if (document == null) {
 			// Second try: create new document, add to cache
 			document = new Document();
 			document.add(new StringField(Constants.FIELD_RESOURCE, resource, Field.Store.YES));
-			
+
 		}
-	
+
 		documentCache.put(resource, document);
 		return document;
 	}
 
 	private Document getDocumentFromIndex(String resource) throws IOException {
 
-		if(searcher == null) {
+		if (searcher == null) {
 			return null;
 		}
-		
-		// resourceTerm.set(LuceneLookupSearcher.FIELD_RESOURCE, new BytesRef(resource));
+
+		// resourceTerm.set(LuceneLookupSearcher.FIELD_RESOURCE, new
+		// BytesRef(resource));
 
 		Term resourceTerm = new Term(Constants.FIELD_RESOURCE, resource);
 		TermQuery resourceTermQuery = new TermQuery(resourceTerm);
-	
-		
+
 		TopDocs docs = searcher.search(resourceTermQuery, 1);
-		
-		if(docs.totalHits > 0) {
+
+		if (docs.totalHits > 0) {
 
 			Document document = searcher.doc(docs.scoreDocs[0].doc);
 			document.removeField("resource");
 			document.add(new StringField("resource", resource, Field.Store.YES));
-			
+
 			// Fetched document fields are all reset to default stored/text fields
-			// Special fields such as the numeric fields have to be reset to their respective type
-			for(IndexField field : indexConfig.getIndexFields()) {
-				
+			// Special fields such as the numeric fields have to be reset to their
+			// respective type
+			for (IndexField field : indexConfig.getIndexFields()) {
+
 				String fieldType = field.getFieldType();
-				
-				if(fieldType == null) {
+
+				if (fieldType == null) {
 					continue;
 				}
-				
+
 				// Remove all numeric index fields and re-add them to the document as
 				// NumericDocValuesField (plus StoredField for retrieval)
-				if(fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_NUMERIC)) {
-					
-					// Fetch the field with the given index field name (does not support multi-values)
+				if (fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_NUMERIC)) {
+
+					// Fetch the field with the given index field name (does not support
+					// multi-values)
 					IndexableField numericField = document.getField(field.getFieldName());
-					
+
 					// Only do this if a field with the given field name exists
-					if(numericField != null) {
-						
+					if (numericField != null) {
+
 						// Fetch the field long value
 						long value = numericField.numericValue().longValue();
-						
+
 						// Remove all fields with the respective name
 						document.removeFields(field.getFieldName());
-						
+
 						// Re-add the field
 						document.add(new NumericDocValuesField(field.getFieldName(), value));
 						document.add(new StoredField(field.getFieldName(), value));
 					}
 				}
 			}
-			
+
 			return document;
 		}
 
@@ -278,29 +287,29 @@ public class LuceneLookupIndexer {
 	}
 
 	public void commit() {
-		
+
 		logger.info("Latest: [" + lastValue + "] --> <" + lastResource + "> ");
 		logger.info("=== COMMITING ===");
 
 		try {
 			indexWriter.commit();
-			indexWriter.close();
-			
-			index = FSDirectory.open(new File(filePath).toPath());
 
-			indexWriter = new IndexWriter(index, createWriterConfig());
-		
-			IndexReader reader = DirectoryReader.open(index);
-			searcher = new IndexSearcher(reader);
 			documentCache = new ConcurrentHashMap<String, Document>();
+			searcher = new IndexSearcher(DirectoryReader.open(indexDirectory));
+
+			// index = FSDirectory.open(new File(indexPath).toPath());
+			// indexWriter = new IndexWriter(indexDirectory, createWriterConfig());
+
+			// IndexReader reader = DirectoryReader.open(indexDirectory);
+			// searcher = new IndexSearcher(reader);
+			// documentCache = new ConcurrentHashMap<String, Document>();
 
 			System.gc();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
+
 	}
 
 	public boolean clearIndex() {
@@ -309,7 +318,7 @@ public class LuceneLookupIndexer {
 			indexWriter.deleteAll();
 			commit();
 			return true;
-		} catch(IndexNotFoundException e) {
+		} catch (IndexNotFoundException e) {
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -318,11 +327,36 @@ public class LuceneLookupIndexer {
 		return false;
 	}
 
+	public void finish() {
+		try {
+			indexWriter.close();
+
+			// Remove lock file
+			File lockFile = new File(indexPath + lockFileName);
+			lockFile.delete();
+
+			// If we are in a staging area, copy the results over
+			if (indexConfig.isCleanIndex()) {
+				File targetFile = new File(targetPath);
+
+				FileUtils.cleanDirectory(targetFile);
+				File indexFile = new File(indexPath);
+
+				for(File file : indexFile.listFiles()) {
+					FileUtils.moveToDirectory(file, targetFile, false);
+				}
+
+				indexFile.delete();
+
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
 
 	public void test() {
-		
-		
+
 	}
-	
 
 }

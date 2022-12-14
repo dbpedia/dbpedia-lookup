@@ -1,0 +1,15 @@
+version: "1.0"
+indexPath: /databus/search/index
+exactMatchBoost: 10
+prefixMatchBoost: 5
+fuzzyMatchBoost: 2
+fuzzyEditDistance: 2
+fuzzyPrefixLength: 2
+maxResults: 100
+format: JSON
+minRelevanceScore: 0.1
+queryFields:
+  - fieldName: label
+    weight: 10
+    tokenize: true
+    queryByDefault: true

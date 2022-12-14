@@ -1,7 +1,0 @@
-version: "3.0"
-services:
-  lookup-indexer:
-    build: ../.
-    volumes:
-      - ./test-config.yml:/root/app-config.yml
-      - ./index:/root/index

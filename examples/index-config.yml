@@ -1,5 +1,5 @@
 version: "1.0"
-indexPath: ./root/index
+indexPath: /root/index
 indexMode: INDEX_SPARQL
 sparqlEndpoint: https://dbpedia.org/sparql
 cleanIndex: true
@@ -14,4 +14,4 @@ indexFields:
         ?resource a <http://dbpedia.org/ontology/City> .
         ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
         FILTER (LANG(?label) = "en").
-      } LIMIT 1000
+      } LIMIT 2000
