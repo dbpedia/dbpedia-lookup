@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
  */
 public class Main {
 
+	private static final String CLI_OPT_CONFIG_PATH = "c";
+
 	private static final String CLI_OPT_CONFIG_PATH_LONG = "config";
 
 	private static final String CLI_OPT_CONFIG_PATH_HELP = "The path of the application configuration file.";
@@ -59,7 +61,7 @@ public class Main {
 		String configPath = null;
 
 		Options options = new Options();
-		options.addOption(CLI_OPT_CONFIG_PATH_LONG, CLI_OPT_CONFIG_PATH_LONG, true, CLI_OPT_CONFIG_PATH_HELP);
+		options.addOption(CLI_OPT_CONFIG_PATH, CLI_OPT_CONFIG_PATH_LONG, true, CLI_OPT_CONFIG_PATH_HELP);
 
 		CommandLineParser cmdParser = new DefaultParser();
 
@@ -67,8 +69,8 @@ public class Main {
 
 			CommandLine cmd = cmdParser.parse(options, args);
 
-			if (cmd.hasOption(CLI_OPT_CONFIG_PATH_LONG)) {
-				configPath = cmd.getOptionValue(CLI_OPT_CONFIG_PATH_LONG);
+			if (cmd.hasOption(CLI_OPT_CONFIG_PATH)) {
+				configPath = cmd.getOptionValue(CLI_OPT_CONFIG_PATH);
 			}
 
 		} catch (org.apache.commons.cli.ParseException e1) {

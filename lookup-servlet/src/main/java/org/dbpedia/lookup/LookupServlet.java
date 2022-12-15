@@ -7,10 +7,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Hashtable;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -44,6 +45,8 @@ public class LookupServlet extends HttpServlet {
 
 	private Transformer xformer;
 
+	public static final String CONFIG_PATH = "configpath";
+
 	private static final String[] PARAM_MAX_RESULTS = { "MaxHits", "maxResults" };
 
 	private static final String[] PARAM_FORMAT = { "format" };
@@ -52,11 +55,10 @@ public class LookupServlet extends HttpServlet {
 
 	private static final String[] PARAM_MIN_RELEVANCE = { "minRelevance" };
 
-	private static final String PARAM_CONFIG_PATH = "configpath";
-
 	private String initializationError;
 
 	final static Logger logger = LogManager.getLogger(LookupServlet.class);
+
 
 	@Override
 	public void init() throws ServletException {
@@ -64,7 +66,9 @@ public class LookupServlet extends HttpServlet {
 		try {
 
 			initializationError = null;
-			config = QueryConfig.Load(getServletContext().getInitParameter(PARAM_CONFIG_PATH));
+
+			String configPath = getInitParameter(CONFIG_PATH);
+			config = QueryConfig.Load(configPath);
 			searcher = new LuceneLookupSearcher(config.getIndexPath(), config);
 
 		} catch (Exception e) {

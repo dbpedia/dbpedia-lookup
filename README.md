@@ -94,12 +94,9 @@ The following environment variables of the lookup application can be set in the 
 * **TDB_PATH** If you select the INDEX_MODE *BUILD_DISK* or *INDEX_DISK* the lookup will use an on-disk TDB2 database. You can specifiy the path of this data structure to save it via docker volume. This can save you the trouble of rebuilding the database each time you run the docker.
 * **CONFIG_PATH** The application configuration is provided via docker volume. If you prefer to change the default path of the application configuration (even thought there is really no reason to do so) you can tell the lookup application where to find the configuration file using the environment variable *CONFIG_PATH*
 
-
 The lookup container will wait for the download client to finish and then index all files in the configured data path. Once the index is running, you can add more files to this folder to add them to the index. Note that this will trigger a short (few seconds) downtime when the container restarts the tomcat after reindexing.
 
-
 ## Application Configuration
-
 
 This is the example YAML Configuration that will be present in the docker container. Note that the configuration is very specific to your data so that you will have to overwrite it with your own configuration (see the description above) in almost all cases. The provided configuration can be used to build the DBpedia Lookup index.
 

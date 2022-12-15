@@ -48,14 +48,9 @@ release.properties
 dependency-reduced-pom.xml
 
 # Application
-lookup-application/local-files/
-lookup-application/pull-local-files.sh
-lookup-application/tb-graph/
 lookup-index/
 /bin/
-lookup-application/WebContent
 WebContent
-lookup-application/bin
 data
 lucene-index
 tb-graph

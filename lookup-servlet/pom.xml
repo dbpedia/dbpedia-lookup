@@ -3,7 +3,6 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dbpedia.org</groupId>
   <artifactId>lookup-servlet</artifactId>
-  <packaging>war</packaging>
   <version>1.0</version>
   <name>lookup-servlet</name>
   <url>https://github.com/dbpedia/dbpedia-lookup</url>
@@ -11,7 +10,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <configpath></configpath>
   </properties>
   <dependencies>
     <dependency>
@@ -108,11 +106,43 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.3.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>11.0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+      <version>11.0.3</version>
+    </dependency>
+
   </dependencies>
   <build>
-    <pluginManagement>
-      <plugins>
-      </plugins>
-    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>org.dbpedia.lookup.JettyLookupServer</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 </project>
