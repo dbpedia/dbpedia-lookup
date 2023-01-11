@@ -1,0 +1,34 @@
+version: "1.0"
+indexPath: ./../../playground/dbpedia-index
+exactMatchBoost: 5
+prefixMatchBoost: 2
+fuzzyMatchBoost: 1
+fuzzyEditDistance: 2
+fuzzyPrefixLength: 2
+boostFormula: sqrt(refCount+1)
+maxResults: 100
+format: XML
+formatTemplate: ./examples/dbpedia/template.xsl
+minRelevanceScore: 0.1
+queryFields:
+  - fieldName: label
+    weight: 10
+    highlight: true
+    queryByDefault: true
+  - fieldName: redirectlabel
+    weight: 10
+    highlight: true
+    queryByDefault: true
+  - fieldName: comment
+    weight: 0.5
+    highlight: true
+    queryByDefault: true
+    allowPartialMatch: true
+  - fieldName: typeName
+    weight: 0.1
+    highlight: false
+    required: true
+    exact: true
+    allowPartialMatch: true
+    aliases:
+      - QueryClass

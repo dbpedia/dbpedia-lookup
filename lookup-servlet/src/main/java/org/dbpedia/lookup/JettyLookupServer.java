@@ -4,7 +4,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.LoggerFactory;
@@ -19,8 +22,6 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
-
-
 public class JettyLookupServer {
 
     private static final String CLI_OPT_CONFIG_PATH = "c";
@@ -28,6 +29,14 @@ public class JettyLookupServer {
     private static final String CLI_OPT_CONFIG_PATH_LONG = "config";
 
     private static final String CLI_OPT_CONFIG_PATH_HELP = "The path of the application configuration file.";
+  
+    private static final String CLI_OPT_RESOURCE_BASE_PATH = "h";
+
+    private static final String CLI_OPT_RESOURCE_BASE_PATH_LONG = "home";
+
+    private static final String CLI_OPT_RESOURCE_BASE_PATH_HELP = "The path of the index.html";
+
+    private static final String CLI_OPT_RESOURCE_BASE_PATH_DEFAULT = "./webapp";
 
     private static Server server;
 
@@ -37,11 +46,15 @@ public class JettyLookupServer {
 
         log = LoggerFactory.getLogger(JettyLookupServer.class);
         String configPath = null;
+        String resourceBasePath = CLI_OPT_RESOURCE_BASE_PATH_DEFAULT;
 
         Options options = new Options();
         options.addOption(CLI_OPT_CONFIG_PATH,
                 CLI_OPT_CONFIG_PATH_LONG, true,
                 CLI_OPT_CONFIG_PATH_HELP);
+        options.addOption(CLI_OPT_RESOURCE_BASE_PATH,
+                CLI_OPT_RESOURCE_BASE_PATH_LONG, true,
+                CLI_OPT_RESOURCE_BASE_PATH_HELP);
 
         CommandLineParser cmdParser = new DefaultParser();
 
@@ -53,17 +66,32 @@ public class JettyLookupServer {
                 configPath = cmd.getOptionValue(CLI_OPT_CONFIG_PATH);
             }
 
+            if (cmd.hasOption(CLI_OPT_RESOURCE_BASE_PATH)) {
+                resourceBasePath = cmd.getOptionValue(CLI_OPT_RESOURCE_BASE_PATH);
+            }
+
         } catch (org.apache.commons.cli.ParseException e1) {
             e1.printStackTrace();
         }
 
         server = new Server(8082);
 
-        ServletHandler handler = new ServletHandler();
-        server.setHandler(handler);
-
-        ServletHolder hodler = handler.addServletWithMapping(LookupServlet.class, "/api/search/*");
+        ServletHandler searchHandler = new ServletHandler();
+        
+        ServletHolder hodler = searchHandler.addServletWithMapping(LookupServlet.class, "/api/search/*");
         hodler.setInitParameter(LookupServlet.CONFIG_PATH, configPath);
+
+        // Index page setup
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setDirectoriesListed(false);
+        resourceHandler.setWelcomeFiles(new String[] { "index.html" });
+        resourceHandler.setResourceBase(resourceBasePath);
+    
+        HandlerList handlers = new HandlerList();
+        handlers.setHandlers(new Handler[] { resourceHandler, searchHandler });
+        server.setHandler(handlers);
+
+        server.setHandler(handlers);
         server.start();
 
         watchIndex(configPath);

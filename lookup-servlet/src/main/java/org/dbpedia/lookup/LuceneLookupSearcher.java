@@ -2,7 +2,6 @@ package org.dbpedia.lookup;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -126,15 +125,13 @@ public class LuceneLookupSearcher implements ILookupSearcher {
 			SimpleBindings bindings = new SimpleBindings();
 
 			for(String variable : expression.variables) {
-				if(bindings.getDoubleValuesSource(variable) == null) {
-					System.out.println("Adding double value source for " + variable);
-					bindings.add(variable, DoubleValuesSource.fromLongField(variable));
-				}
+				System.out.println("Adding double value source for " + variable);
+				bindings.add(variable, DoubleValuesSource.fromLongField(variable));
 			}
 
 			this.boostValueSource = expression.getDoubleValuesSource(bindings);
 			
-		} catch(ParseException e) {
+		} catch(final Exception e) {
 			System.err.println("Failed to create boost value source:");
 			System.err.println(e.getMessage());
 			this.boostValueSource = null;

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>DBpedia Lookup</title>
+    <meta name="description" content="DBpedia Lookup">
+    <meta name="author" content="Jan Forberg">
+    <style>
+        body {
+            background-color: linen;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans JP', sans-serif;
+            color: #333;
+        }
+        h2 {
+            font-size: 1em;
+            width: 100%;
+            border-bottom: solid 1px #dbdbdb;
+            padding-bottom: 4px;
+            margin-top: 0px;
+        }
+        h1 {
+            font-size: 2.4em;
+            margin-bottom: -1px;
+            letter-spacing: 1px;
+            font-weight: 1000;
+            color:#002642;
+        }
+        #logo {
+            margin-right: 8px;
+        }
+        #query {
+            border-radius: 0;
+            border: 1px #dbdbdb solid;
+            padding: 8px;
+            font-size: 1em;
+            flex: 1;
+        }
+        #search-button {
+            font-size: 1em;
+            border: none;
+            background-color: #104057;
+            color: white;
+            margin-left: 4px;
+            padding: 8px;
+        }
+        #header-panel {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 24px;
+        }
+        #search-panel {
+            display: flex;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+        a {
+            color:lightslategray;
+        }
+        #main-panel {
+            text-align: center;
+        }
+        #result-panel {
+            text-align: left;
+            align-self: flex-start;
+            width: 100%;
+            flex-grow: 1;
+        }
+        #content-panel {
+            width: 800px;
+            height: 380px;
+            background-color: white;
+            text-align: left;
+            padding: 32px;
+            display: flex;
+            align-items: stretch;
+            flex-direction: column;
+        }
+        #footer-panel {
+            margin-bottom: 16px;
+            font-size: 0.8em;
+            color: #aaa;
+            width: 100%;
+        }
+        .hint {
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-panel">
+        <div id="header-panel">
+            <img id="logo" src="https://upload.wikimedia.org/wikipedia/commons/c/c0/DBpedia-Logo_.png" height="96px" />
+            <h1>Lookup</h1>
+        </div>
+         <div id="footer-panel">
+            <div>Documentation at <a href="https://github.com/dbpedia/dbpedia-lookup">https://github.com/dbpedia/dbpedia-lookup</a></div>
+            <div>Search API at <a href="https://lookup.dbpedia.org/api/search?query=Leipzig">https://lookup.dbpedia.org/api/search?query=Leipzig</a></div>
+            <div>Auto-Complete API at <a href="https://lookup.dbpedia.org/api/prefix?query=Leipzig">https://lookup.dbpedia.org/api/prefix?query=Leipzig</a></div>
+        </div>
+
+        <div id="content-panel">
+            <h2>Test it here:</h2>
+            <div id="search-panel">
+                <input id="query" type="text" label="Search" placeholder="Enter one or more keywords..." />
+                <button id="search-button" type="button" onclick="search()">Search</button>
+            </div>
+            <div id="result-panel">
+                <h2>Top 10 Results:</h2>
+                <div id="response-panel">
+                    <div class="hint"><i>No results</i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var input = document.getElementById("query");
+        input.addEventListener("keyup", function (event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById("search-button").click();
+            }
+        });
+        function searchCallback(document, text) {
+            var response = JSON.parse(text);
+            var responsePanel = document.getElementById("response-panel");
+            var child = responsePanel.lastElementChild;
+            while (child) {
+                responsePanel.removeChild(child);
+                child = responsePanel.lastElementChild;
+            }
+            if (response.docs.length == 0) {
+                var div = document.createElement('div');
+                div.classList.add("hint");
+                div.innerHTML = "<i>No results</i>";
+                responsePanel.appendChild(div);
+            }
+            for (var d in response.docs) {
+                var doc = response.docs[d];
+                var div = document.createElement('div');
+                div.innerHTML =  doc.label[0] + " - <a target='_blank' href='" + doc.resource + "'>" + doc.resource + "</a>";
+                responsePanel.appendChild(div)
+            }
+        }
+      
+       
+        function search() {
+            // Change this to YOUR lookup url
+            var searchUrl = "/api/search?maxResults=10&format=JSON&query=" + document.getElementById("query").value;
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", searchUrl, true);
+            xmlHttp.setRequestHeader("Content-Type", "application/json");
+            xmlHttp.onreadystatechange = function () {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                    searchCallback(document, xmlHttp.responseText);
+            }
+            xmlHttp.send();
+            var responsePanel = document.getElementById("response-panel");
+            var child = responsePanel.lastElementChild;
+            while (child) {
+                responsePanel.removeChild(child);
+                child = responsePanel.lastElementChild;
+            }
+            var div = document.createElement('div');
+            div.classList.add("hint");
+            div.innerHTML = "<i>Searching...</i>";
+            responsePanel.appendChild(div);
+        }
+    </script>
+</body>
+</html>
+

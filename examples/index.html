@@ -26,8 +26,8 @@
         }
         h1 {
             font-size: 2.4em;
-            margin-bottom: -3px;
-            letter-spacing: -1px;
+            margin-bottom: -1px;
+            letter-spacing: 1px;
             font-weight: 1000;
             color:#002642;
         }
@@ -93,7 +93,6 @@
             color: #ccc;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="main-panel">
@@ -103,12 +102,9 @@
         </div>
          <div id="footer-panel">
             <div>Documentation at <a href="https://github.com/dbpedia/dbpedia-lookup">https://github.com/dbpedia/dbpedia-lookup</a></div>
-            <div>Search API at <a href="https://lookup.dbpedia.org/api/search?query=Leipzig">https://lookup.dbpedia.org/api/search?query=Leipzig</a></div>
-            <div>Auto-Complete API at <a href="https://lookup.dbpedia.org/api/prefix?query=Leipzig">https://lookup.dbpedia.org/api/prefix?query=Leipzig</a></div>
         </div>
-
         <div id="content-panel">
-            <h2>Test it here:</h2>
+            <h2>Search:</h2>
             <div id="search-panel">
                 <input id="query" type="text" label="Search" placeholder="Enter one or more keywords..." />
                 <button id="search-button" type="button" onclick="search()">Search</button>
@@ -154,7 +150,7 @@
        
         function search() {
             // Change this to YOUR lookup url
-            var searchUrl = "https://lookup.dbpedia.org/api/search?maxResults=10&format=JSON&query=" + document.getElementById("query").value;
+            var searchUrl = "/api/search?maxResults=10&format=JSON&query=" + document.getElementById("query").value;
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.open("GET", searchUrl, true);
             xmlHttp.setRequestHeader("Content-Type", "application/json");

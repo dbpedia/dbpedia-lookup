@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "org.dbpedia.lookup.JettyLookupServer",
             "projectName": "lookup-servlet",
-            "args": "-c ./examples/servlet-config.yml"
+            "args": "-c ./examples/dbpedia/servlet-config.yml -h ./examples/dbpedia"
         },
         {
             "type": "java",

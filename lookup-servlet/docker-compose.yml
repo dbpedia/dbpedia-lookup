@@ -1,9 +1,10 @@
 version: "3.0"
 services:
-  lookup-servlet:
+  lookup-server:
     build: ./
     ports:
       - 8081:8082
     volumes:
-      - ../examples/servlet-config.yml:/lookup-servlet/servlet-config.yml
-      - ../index:/index
+      - ../examples/servlet-config.yml:/lookup/config.yml
+      - ../index:/lookup/index
+      - ../examples/index.html:/lookup/webapp/index.html
