@@ -7,14 +7,19 @@ import org.apache.commons.cli.Options;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import static java.nio.file.StandardWatchEventKinds.*;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+
+
 
 public class JettyLookupServer {
 
@@ -26,14 +31,17 @@ public class JettyLookupServer {
 
     private static Server server;
 
+    private static org.slf4j.Logger log;
+
     public static void main(String[] args) throws Exception {
 
+        log = LoggerFactory.getLogger(JettyLookupServer.class);
         String configPath = null;
 
         Options options = new Options();
-        options.addOption(CLI_OPT_CONFIG_PATH, 
-            CLI_OPT_CONFIG_PATH_LONG, true, 
-            CLI_OPT_CONFIG_PATH_HELP);
+        options.addOption(CLI_OPT_CONFIG_PATH,
+                CLI_OPT_CONFIG_PATH_LONG, true,
+                CLI_OPT_CONFIG_PATH_HELP);
 
         CommandLineParser cmdParser = new DefaultParser();
 
@@ -58,50 +66,52 @@ public class JettyLookupServer {
         hodler.setInitParameter(LookupServlet.CONFIG_PATH, configPath);
         server.start();
 
+        watchIndex(configPath);
+
+        log.info("EXITING. STOPPING SERVER.");
+        server.stop();
+    }
+
+    private static void watchIndex(String configPath) throws Exception, IOException, InterruptedException {
         QueryConfig queryConfig = QueryConfig.Load(configPath);
+        
         WatchService watcher = FileSystems.getDefault().newWatchService();
 
+        File indexDirectoryFile = new File(queryConfig.getIndexPath());
+        indexDirectoryFile.mkdirs();
+
         Path indexDirectory = Paths.get(queryConfig.getIndexPath());
-        indexDirectory.register(watcher,
-                ENTRY_CREATE,
-                ENTRY_DELETE,
-                ENTRY_MODIFY);
-
-
-        System.out.println("WAITING FOR INDEX CHANGES.");
+        indexDirectory.register(watcher, 
+            StandardWatchEventKinds.ENTRY_CREATE,
+            StandardWatchEventKinds.ENTRY_MODIFY);
 
         while (true) {
 
             Thread.sleep(1000);
-            WatchKey key;
-            key = watcher.poll();
+            WatchKey key = watcher.poll();
 
-            if(key == null) {
+            if (key == null) {
                 continue;
             }
 
-            for (WatchEvent<?> event: key.pollEvents()) {
+            for (WatchEvent<?> event : key.pollEvents()) {
                 WatchEvent.Kind<?> kind = event.kind();
-        
-                if (kind == OVERFLOW) {
+
+                if (kind == StandardWatchEventKinds.OVERFLOW) {
                     continue;
                 }
 
-                System.out.println("INDEX CHANGED - RESTARTING SERVER");
                 server.stop();
                 server.start();
-                System.out.println("SERVER UP AND READY.");
                 break;
             }
-        
-            boolean valid = key.reset();
 
-            if(!valid) {
-                break;
+            if (!key.isValid()) {
+                log.info("key is INVALID!");
             }
+
+            key.reset();
         }
-
-        System.out.println("EXITING. STOPPING SERVER.");
-        server.stop();
+         
     }
 }

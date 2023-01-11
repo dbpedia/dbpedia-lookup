@@ -82,6 +82,7 @@ public class QueryField {
 		copy.isExact = this.isExact;
 		copy.tokenize = this.tokenize;
 		copy.aliases = this.aliases;
+		copy.allowPartialMatch = this.allowPartialMatch;
 		return copy;
 	}
 

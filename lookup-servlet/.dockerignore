@@ -3,3 +3,4 @@
 .gitignore
 */test
 */index
+*/logs

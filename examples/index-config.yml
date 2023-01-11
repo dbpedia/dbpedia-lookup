@@ -14,4 +14,4 @@ indexFields:
         ?resource a <http://dbpedia.org/ontology/City> .
         ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
         FILTER (LANG(?label) = "en").
-      } LIMIT 1000
+      } LIMIT 1001

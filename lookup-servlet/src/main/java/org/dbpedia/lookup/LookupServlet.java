@@ -22,11 +22,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.zookeeper.common.Time;
 import org.json.JSONObject;
 import org.json.XML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LookupServlet extends HttpServlet {
 
@@ -57,8 +57,7 @@ public class LookupServlet extends HttpServlet {
 
 	private String initializationError;
 
-	final static Logger logger = LogManager.getLogger(LookupServlet.class);
-
+	final static Logger logger = LoggerFactory.getLogger(LookupServlet.class);
 
 	@Override
 	public void init() throws ServletException {
