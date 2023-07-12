@@ -4,7 +4,7 @@ There is a discussion thread on the DBpedia forums for questions and suggestions
 
 DBpedia Lookup is a generic entity retrieval service for RDF data. It can be configured to index any RDF data and provice a retrieval services that resolves keywords to entity identifiers.
 
-This repository contains preset projects to run the DBpedia Lookup with the DBpedia Latest Core release. This can be achieved either by building the index on your machine or by loading a pre-built index from the DBpedia Databus [here](https://databus.dbpedia.org/jan/dbpedia-lookup/index/)
+This repository contains preset projects to run the DBpedia Lookup with the DBpedia Latest Core release. This can be achieved either by building the index on your machine or by loading a pre-built index from the DBpedia Databus [here](https://databus.dbpedia.org/janfo/dbpedia-lookup/index/)
 
 ## Demo
 
@@ -22,7 +22,7 @@ Download any of the preset projects from the example folder, navigate to the pre
 docker-compose up
 ```
 
-If you are using a pre-built index preset (recommended), please download the respective index structure from the DBpedia Databus [here](https://databus.dbpedia.org/jan/dbpedia-lookup/index/) to your preset folder and unpack it (use either `index_autocomplete.tar.gz` or `index_keyword.tar.gz` depending on the loaded file) before you run the container. **Only use one index file - do not mix multiple indices together.**
+If you are using a pre-built index preset (recommended), please download the respective index structure from the DBpedia Databus [here](https://databus.dbpedia.org/janfo/dbpedia-lookup/index/) to your preset folder and unpack it (use either `index_autocomplete.tar.gz` or `index_keyword.tar.gz` depending on the loaded file) before you run the container. **Only use one index file - do not mix multiple indices together.**
 
 ```
 tar -zxvf index_autocomplete.tar.gz
@@ -63,7 +63,7 @@ services:
   download:
     image: dbpedia/dbpedia-databus-collection-downloader:latest
     environment:
-      COLLECTION_URI: https://databus.dbpedia.org/jan/collections/lookup
+      COLLECTION_URI: https://databus.dbpedia.org/janfo/collections/lookup
       TARGET_DIR: /root/data
     volumes:
       - ./data:/root/data
@@ -86,7 +86,7 @@ services:
 ```
 
 
-The docker compose loads the latest lookup docker image and exposes the service on a configurable port. Additionally, it uses the minimal-download-client from Dockerhub to download the files to index from the DBpedia databus. The minimal-download-client container takes a Databus collection URI and downloads its data. You can use an existing collection or create your own at http://databus.dbpedia.org. The provided collection (https://databus.dbpedia.org/jan/collections/lookup) includes all the required data to build the DBpedia Lookup index. 
+The docker compose loads the latest lookup docker image and exposes the service on a configurable port. Additionally, it uses the minimal-download-client from Dockerhub to download the files to index from the DBpedia databus. The minimal-download-client container takes a Databus collection URI and downloads its data. You can use an existing collection or create your own at http://databus.dbpedia.org. The provided collection (https://databus.dbpedia.org/janfo/collections/lookup) includes all the required data to build the DBpedia Lookup index. 
 
 The following environment variables of the lookup application can be set in the docker-compose:
 
