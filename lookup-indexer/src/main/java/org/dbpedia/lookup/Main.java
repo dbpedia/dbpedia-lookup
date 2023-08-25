@@ -22,6 +22,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.function.library.print;
 import org.apache.jena.system.Txn;
 import org.apache.jena.tdb2.DatabaseMgr;
 import org.apache.jena.tdb2.loader.DataLoader;
@@ -44,6 +45,18 @@ public class Main {
 
 	private static final String CLI_OPT_CONFIG_PATH_HELP = "The path of the application configuration file.";
 
+	private static final String CLI_OPT_RESOURCE = "r";
+
+	private static final String CLI_OPT_RESOURCE_LONG = "resource";
+
+	private static final String CLI_OPT_RESOURCE_HELP = "The URI to the resource";
+
+	private static final String CLI_OPT_RESOURCE_FILE = "f";
+
+	private static final String CLI_OPT_RESOURCE_FILE_PATH = "resource file";
+
+	private static final String CLI_OPT_RESOURCE_FILE_HELP = "The path to the resource file";
+
 	private static Logger logger;
 
 	/**
@@ -62,8 +75,11 @@ public class Main {
 
 		Options options = new Options();
 		options.addOption(CLI_OPT_CONFIG_PATH, CLI_OPT_CONFIG_PATH_LONG, true, CLI_OPT_CONFIG_PATH_HELP);
+		options.addOption(CLI_OPT_RESOURCE, CLI_OPT_RESOURCE_LONG, true, CLI_OPT_RESOURCE_HELP);
+		options.addOption(CLI_OPT_RESOURCE_FILE, CLI_OPT_RESOURCE_FILE_PATH, true, CLI_OPT_RESOURCE_FILE_HELP);
 
 		CommandLineParser cmdParser = new DefaultParser();
+		String resourceURI = null;
 
 		try {
 
@@ -71,6 +87,14 @@ public class Main {
 
 			if (cmd.hasOption(CLI_OPT_CONFIG_PATH)) {
 				configPath = cmd.getOptionValue(CLI_OPT_CONFIG_PATH);
+			}
+			
+			if (cmd.hasOption(CLI_OPT_RESOURCE_FILE)) {
+				resourceURI = cmd.getOptionValue(CLI_OPT_RESOURCE_FILE_PATH);
+			}
+
+			if (cmd.hasOption(CLI_OPT_RESOURCE)) {
+				resourceURI = cmd.getOptionValue(CLI_OPT_RESOURCE);
 			}
 
 		} catch (org.apache.commons.cli.ParseException e1) {
@@ -107,6 +131,21 @@ public class Main {
 
 			// Log the configuration file
 			String contents = new String(Files.readAllBytes(Paths.get(configPath)));
+			logger.info(contents);
+
+			for (IndexField field: indexConfig.getIndexFields()) {
+				String query = field.getQuery();
+				String resourceName = field.getResourceName();
+
+				String valuesClause = "";
+				if (resourceURI != null) {
+					valuesClause = String.format("VALUES ?%1$s { <%2$s> }", resourceName, resourceURI);
+				}
+
+				query = query.replace("%VALUES%", valuesClause);
+				field.setQuery(query);
+			}
+
 			logger.info(contents);
 
 			// Initialize ARQ
