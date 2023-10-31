@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 public interface ILookupSearcher {
 
-	JSONObject search(QueryField[] fields, String[] queries, int maxHits, float minRelevance, String fieldFormat);
+	JSONObject search(QueryField[] fields, String[] queries, int maxHits, float minRelevance, String fieldFormat, String join);
 
 	String[] findResourcesWithField(String field, boolean isStored);
 

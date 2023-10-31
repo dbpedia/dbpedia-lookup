@@ -11,5 +11,26 @@ minRelevanceScore: 0.1
 queryFields:
   - fieldName: label
     weight: 10
+    highlight: true
     tokenize: true
+    queryByDefault: true
+  - fieldName: resource
+    weight: 10
+    exact: true
+    tokenize: false
+    queryByDefault: true
+  - fieldName: annotation
+    weight: 10
+    exact: true
+    tokenize: false
+    queryByDefault: true
+  - fieldName: oeoNumber
+    weight: 10
+    highlight: true
+    exact: true
+    queryByDefault: true
+  - fieldName: classId
+    exact: true
+    weight: 10
+    highlight: true
     queryByDefault: true

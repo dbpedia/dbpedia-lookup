@@ -1,17 +1,91 @@
 version: "1.0"
 indexPath: ./index
 indexMode: INDEX_SPARQL
-sparqlEndpoint: https://dbpedia.org/sparql
+sparqlEndpoint: https://mods.tools.dbpedia.org/sparql
 cleanIndex: true
 cacheSize: 1000000
 commitInterval: 100
 indexFields:
   - fieldName: label
     resourceName: resource
-    fieldType: string
     query: >
       SELECT ?resource ?label WHERE {
-        ?resource a <http://dbpedia.org/ontology/City> .
-        ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
-        FILTER (LANG(?label) = "en").
-      } LIMIT 1001
+        GRAPH <https://openenergy-platform.org/ontology> {
+          {
+            ?resource a <http://www.w3.org/2002/07/owl#Class> .
+          }
+          UNION 
+          {
+            ?resource a <http://www.w3.org/2002/07/owl#NamedIndividual> .
+          }
+          ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+        }
+      }
+  - fieldName: oeoNumber
+    resourceName: resource
+    query: >
+      SELECT DISTINCT ?resource ?oeoNumber WHERE {
+        GRAPH <https://openenergy-platform.org/ontology> {
+          {
+            ?resource a <http://www.w3.org/2002/07/owl#Class> .
+          }
+          UNION 
+          {
+            ?resource a <http://www.w3.org/2002/07/owl#NamedIndividual> .
+          }
+          BIND(REPLACE(str(?resource), ".*/OEO_[0]*", "") as ?oeoNumber).
+        }
+        
+        FILTER (isURI(?resource))
+      }
+  - fieldName: classId
+    resourceName: resource
+    query: >
+      SELECT DISTINCT ?resource ?classId WHERE {
+        GRAPH <https://openenergy-platform.org/ontology> {
+          {
+            ?resource a <http://www.w3.org/2002/07/owl#Class> .
+          }
+          UNION 
+          {
+            ?resource a <http://www.w3.org/2002/07/owl#NamedIndividual> .
+          }
+          BIND(REPLACE(str(?resource), ".*/", "") as ?classId).
+        }
+        
+        FILTER (isURI(?resource))
+      }
+  - fieldName: annotation
+    resourceName: databusFile
+    fieldType: string
+    query: >
+      SELECT ?databusFile ?annotation {
+        {
+          GRAPH ?g {
+            
+            ?activity a <http://mods.tools.dbpedia.org/ns/demo#AnnotationMod> .
+            ?activity <http://www.w3.org/ns/prov#used> ?databusFile .
+            ?databusFile <http://purl.org/dc/elements/1.1/annotation> ?annotation .
+          }
+        }
+        UNION
+        {
+          GRAPH ?g {
+            ?activity a <http://mods.tools.dbpedia.org/ns/demo#ApiDemoMod> .
+            ?activity <http://www.w3.org/ns/prov#used> ?databusFile .
+            ?databusFile <http://www.w3.org/ns/csvw#table> ?table .
+            ?table <http://www.w3.org/ns/csvw#tableSchema> ?tableSchema .
+            ?tableSchema <http://www.w3.org/ns/csvw#column> ?column .
+            ?column  <http://purl.org/goodrelations/v1#valueReference>|<https://saref.etsi.org/core/isAbout> ?annotation .
+          }
+        }
+        UNION
+        {
+          GRAPH ?g {
+            ?activity a <http://mods.tools.dbpedia.org/ns/demo#ApiDemoMod> .
+            ?activity <http://www.w3.org/ns/prov#used> ?databusFile .
+            ?databusFile <http://purl.org/dc/elements/1.1/annotation> ?annotation .
+          }
+        }
+        FILTER (isURI(?annotation))
+      }

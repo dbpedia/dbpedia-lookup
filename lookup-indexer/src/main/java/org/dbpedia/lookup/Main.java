@@ -22,7 +22,6 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.function.library.print;
 import org.apache.jena.system.Txn;
 import org.apache.jena.tdb2.DatabaseMgr;
 import org.apache.jena.tdb2.loader.DataLoader;
@@ -146,8 +145,6 @@ public class Main {
 				field.setQuery(query);
 			}
 
-			logger.info(contents);
-
 			// Initialize ARQ
 			ARQ.init();
 
@@ -192,7 +189,6 @@ public class Main {
 		logger.info("=====================================================================");
 		logger.info("Done indexing.");
 		logger.info("=====================================================================");
-
 	}
 
 	private static void indexSparql(IndexConfig xmlConfig) {

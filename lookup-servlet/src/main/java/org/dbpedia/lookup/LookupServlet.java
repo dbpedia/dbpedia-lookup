@@ -53,6 +53,9 @@ public class LookupServlet extends HttpServlet {
 
 	private static final String[] PARAM_QUERY = { "QueryString", "query" };
 
+	private static final String[] PARAM_JOIN = { "join" };
+
+
 	private static final String[] PARAM_MIN_RELEVANCE = { "minRelevance" };
 
 	private String initializationError;
@@ -112,6 +115,7 @@ public class LookupServlet extends HttpServlet {
 		}
 
 		String query = getStringParamter(req, PARAM_QUERY, null);
+		String join = getStringParamter(req, PARAM_JOIN, null);
 
 		Hashtable<QueryField, String> queryMap = createQueryMap(req, query);
 
@@ -130,7 +134,7 @@ public class LookupServlet extends HttpServlet {
 
 		logger.info("Search; " + req.getQueryString() + "; " + Time.currentWallTime() + ";");
 
-		JSONObject result = searcher.search(queryMap, maxResults, minRelevance, format);
+		JSONObject result = searcher.search(queryMap, maxResults, minRelevance, format, join);
 
 		if (format.equalsIgnoreCase(QueryConfig.CONFIG_FIELD_FORMAT_XML)) {
 
