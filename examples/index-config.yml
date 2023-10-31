@@ -89,3 +89,37 @@ indexFields:
         }
         FILTER (isURI(?annotation))
       }
+  - fieldName: annotatedCount
+    resourceName: oeoClass
+    fieldType: numeric
+    query: >
+      SELECT ?oeoClass (COUNT(?databusFile) as ?annotatedCount) {
+        {
+          GRAPH ?g {
+
+            ?activity a <http://mods.tools.dbpedia.org/ns/demo#AnnotationMod> .
+            ?activity <http://www.w3.org/ns/prov#used> ?databusFile .
+            ?databusFile <http://purl.org/dc/elements/1.1/annotation> ?oeoClass .
+          }
+        }
+        UNION
+        {
+          GRAPH ?g {
+            ?activity a <http://mods.tools.dbpedia.org/ns/demo#ApiDemoMod> .
+            ?activity <http://www.w3.org/ns/prov#used> ?databusFile .
+            ?databusFile2 <http://www.w3.org/ns/csvw#table> ?table .
+            ?table <http://www.w3.org/ns/csvw#tableSchema> ?tableSchema .
+            ?tableSchema <http://www.w3.org/ns/csvw#column> ?column .
+            ?column  <http://purl.org/goodrelations/v1#valueReference>|<https://saref.etsi.org/core/isAbout> ?oeoClass .
+          }
+        }
+        UNION
+        {
+          GRAPH ?g {
+            ?activity a <http://mods.tools.dbpedia.org/ns/demo#ApiDemoMod> .
+            ?activity <http://www.w3.org/ns/prov#used> ?databusFile .
+            ?databusFile <http://purl.org/dc/elements/1.1/annotation> ?oeoClass .
+          }
+        }
+        FILTER (isURI(?oeoClass))
+      } GROUP BY ?oeoClass
