@@ -233,8 +233,7 @@ public class Main {
 		for (IndexField indexFieldConfig : xmlConfig.getIndexFields()) {
 
 			logger.info("=====================================================================");
-			logger.info("Indexing path for field '" + indexFieldConfig.getFieldName() + "' and resource '"
-					+ indexFieldConfig.getDocumentVariable() + "'");
+			logger.info("Indexing field '" + indexFieldConfig.getFieldName() + "'");
 			logger.info("=====================================================================");
 
 			try (QueryExecution qexec = QueryExecutionFactory.sparqlService(xmlConfig.getSparqlEndpoint(),

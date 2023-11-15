@@ -60,7 +60,7 @@ public class LuceneLookupSearcher {
 
 	public static final String FIELD_REFCOUNT = "refCount";
 
-	public static final String FIELD_RESOURCE = "resource";
+	public static final String FIELD_DOCUMENT_ID = "id";
 
 	public static final String FIELD_LABEL = "label";
 
@@ -211,7 +211,7 @@ public class LuceneLookupSearcher {
 							token), fields[i].getWeight());
 					
 					if(join != null) {
-						boostQuery = JoinUtil.createJoinQuery("resource", false, join,
+						boostQuery = JoinUtil.createJoinQuery(FIELD_DOCUMENT_ID, false, join,
 							boostQuery, this.searcher, ScoreMode.None);
 					}
 

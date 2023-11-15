@@ -8,7 +8,7 @@ public class Constants {
 
 	public static final String FIELD_REFCOUNT = "refCount";
 
-	public static final String FIELD_RESOURCE = "resource";
+	public static final String FIELD_DOCUMENT_ID = "id";
 
 	public static final String FIELD_LABEL = "label";
 

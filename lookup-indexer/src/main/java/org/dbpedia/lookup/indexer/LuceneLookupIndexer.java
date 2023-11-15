@@ -62,7 +62,7 @@ public class LuceneLookupIndexer {
 
 	private Analyzer analyzer;
 
-	private String lastResource = null;
+	private String lastDocument = null;
 
 	private String lastValue = null;
 
@@ -159,7 +159,7 @@ public class LuceneLookupIndexer {
 			RDFNode documentNode = entry.get(path.getDocumentVariable());
 			RDFNode fieldValueNode = entry.get(path.getFieldName());
 
-			lastResource = documentNode.toString();
+			lastDocument = documentNode.toString();
 
 			if (fieldValueNode.isLiteral()) {
 				lastValue = fieldValueNode.asLiteral().getString();
@@ -167,7 +167,7 @@ public class LuceneLookupIndexer {
 				lastValue = fieldValueNode.toString();
 			}
 
-			indexField(lastResource, path, lastValue);
+			indexField(lastDocument, path, lastValue);
 
 			k++;
 
@@ -177,10 +177,10 @@ public class LuceneLookupIndexer {
 		}
 	}
 
-	public void indexField(String resource, IndexField path, String literal) {
+	public void indexField(String documentId, IndexField indexField, String valueString) {
 
-		String field = path.getFieldName();
-		String fieldType = path.getType();
+		String field = indexField.getFieldName();
+		String fieldType = indexField.getType();
 
 		if (fieldType != null) {
 			fieldType = fieldType.toLowerCase();
@@ -189,79 +189,79 @@ public class LuceneLookupIndexer {
 		}
 
 		try {
-			Document doc = findDocument(resource);
+			Document doc = findDocument(documentId);
 
 			switch (fieldType) {
 				case Constants.CONFIG_FIELD_TYPE_NUMERIC:
-					long value = Long.parseLong(literal);
+					long value = Long.parseLong(valueString);
 					doc.removeFields(field);
 					doc.add(new StoredField(field, value));
 					doc.add(new NumericDocValuesField(field, value));
 					break;
 				case Constants.CONFIG_FIELD_TYPE_STORED:
-					doc.add(new StoredField(field, literal));
+					doc.add(new StoredField(field, valueString));
 					break;
 				case Constants.CONFIG_FIELD_TYPE_STRING:
-					doc.add(new StringField(field, literal, Field.Store.YES));
+					doc.add(new StringField(field, valueString, Field.Store.YES));
 					break;
 				case Constants.CONFIG_FIELD_TYPE_STORED_SORTED:
-					doc.add(new StoredField(field, literal));
-					doc.add(new SortedDocValuesField(Constants.FIELD_RESOURCE, new BytesRef(resource)));
+					doc.add(new StoredField(field, valueString));
+					doc.add(new SortedDocValuesField(field, new BytesRef(valueString)));
 					break;
 				default:
-					doc.add(new TextField(field, literal, Field.Store.YES));
+					doc.add(new TextField(field, valueString, Field.Store.YES));
 					break;
 			}
 
-			indexWriter.updateDocument(new Term(Constants.FIELD_RESOURCE, resource), doc);
+			indexWriter.updateDocument(new Term(Constants.FIELD_DOCUMENT_ID, documentId), doc);
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private Document findDocument(String resource) throws IOException {
+	private Document findDocument(String documentId) throws IOException {
 
-		if(resource == null) {
+		if(documentId == null) {
 			return null;
 		}
 
-		if (documentCache.containsKey(resource)) {
-			return documentCache.get(resource);
+		if (documentCache.containsKey(documentId)) {
+			return documentCache.get(documentId);
 		}
 
 		// First try: search the index
-		Document document = getDocumentFromIndex(resource);
+		Document document = getDocumentFromIndex(documentId);
 
 		if (document == null) {
 			// Second try: create new document, add to cache
 			document = new Document();
 
-			document.add(new StringField(Constants.FIELD_RESOURCE, resource, Field.Store.YES));
-			document.add(new SortedDocValuesField(Constants.FIELD_RESOURCE, new BytesRef(resource)));
+			document.add(new StringField(Constants.FIELD_DOCUMENT_ID, documentId, Field.Store.YES));
+			document.add(new SortedDocValuesField(Constants.FIELD_DOCUMENT_ID, new BytesRef(documentId)));
 		}
 
-		documentCache.put(resource, document);
+		documentCache.put(documentId, document);
 		return document;
 	}
 
-	private Document getDocumentFromIndex(String resource) throws IOException {
+	private Document getDocumentFromIndex(String documentId) throws IOException {
 
 		if (searcher == null) {
 			return null;
 		}
 
-		Term resourceTerm = new Term(Constants.FIELD_RESOURCE, resource);
-		TermQuery resourceTermQuery = new TermQuery(resourceTerm);
+		Term documentIdTerm = new Term(Constants.FIELD_DOCUMENT_ID, documentId);
+		TermQuery documentIdTermQuery = new TermQuery(documentIdTerm);
 
-		TopDocs docs = searcher.search(resourceTermQuery, 1);
+		TopDocs docs = searcher.search(documentIdTermQuery, 1);
 
 		if (docs.totalHits > 0) {
 
 			Document document = searcher.doc(docs.scoreDocs[0].doc);
-			document.removeFields(Constants.FIELD_RESOURCE);
-			document.add(new StringField(Constants.FIELD_RESOURCE, resource, Field.Store.YES));
-			document.add(new SortedDocValuesField(Constants.FIELD_RESOURCE, new BytesRef(resource)));
+			document.removeFields(Constants.FIELD_DOCUMENT_ID);
+			document.add(new StringField(Constants.FIELD_DOCUMENT_ID, documentId, Field.Store.YES));
+			document.add(new SortedDocValuesField(Constants.FIELD_DOCUMENT_ID, new BytesRef(documentId)));
 			// Fetched document fields are all reset to default stored/text fields
 			// Special fields such as the numeric fields have to be reset to their
 			// respective type
@@ -305,7 +305,7 @@ public class LuceneLookupIndexer {
 
 	public void commit() {
 
-		logger.info("Latest: [" + lastValue + "] --> <" + lastResource + "> ");
+		logger.info("Latest: [" + lastValue + "] --> <" + lastDocument + "> ");
 		logger.info("=== COMMITING ===");
 
 		try {
