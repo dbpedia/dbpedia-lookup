@@ -43,7 +43,6 @@ indexFields:
           ?person a <http://dbpedia.org/ontology/Person> .
           ?person <http://dbpedia.org/ontology/birthPlace> ?birthPlace .
         }
-        %VALUES%
       } LIMIT 10000
 ```
 
