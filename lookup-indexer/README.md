@@ -12,6 +12,19 @@ A Lucene index can be understood as a collection of documents. Each document has
 
 The [examples folder](../examples/) contains configuration files for a search index over a part of the DBpedia knowledge graph (using [https://dbpedia.org/sparql](https://dbpedia.org/sparql)). This document will only discuss the index configuration. The servlet configuration will be addressed in the [servlet documentation](../lookup-servlet/README.md).
 
+### Running the Example:
+
+You can run the *Launch Index Main* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
+
+Alternatively, you can use maven to build a `.jar` file by issuing
+```
+mvn package
+```
+and then running the resulting `lookup-indexer-1.0-jar-with-dependencies.jar` file via
+```
+java -jar ./target/lookup-indexer-1.0-jar-with-dependencies.jar -c ../examples/index-config.yml
+```
+
 ### Configuration
 
 The [index configuration](../examples/index-config.yml) looks as follows:
@@ -88,15 +101,3 @@ Document
 
 A user searching for the string "Berl" over the field *label* will then be able to quickly retrieve the entire document, since the label field value partially matches the search string.
 
-### Running the Example:
-
-You can run the *Launch Index Main*](./src/main/java/org/dbpedia/lookup/Main.java)* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
-
-Alternatively, you can use maven to build a `.jar` file by issuing
-```
-mvn package
-```
-and then running the resulting `lookup-indexer-1.0-jar-with-dependencies.jar` file via
-```
-java -jar ./target/lookup-indexer-1.0-jar-with-dependencies.jar -c ../examples/index-config.yml
-```
