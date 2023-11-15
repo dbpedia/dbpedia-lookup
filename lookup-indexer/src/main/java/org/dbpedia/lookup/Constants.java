@@ -26,6 +26,8 @@ public class Constants {
 
 	public static final String CONFIG_FIELD_TYPE_STORED = "stored";
 
+	public static final String CONFIG_FIELD_TYPE_STORED_SORTED = "stored_sorted";
+
 	public static final String CONFIG_FIELD_TYPE_STRING = "string";
 
 	public static final String CONFIG_FIELD_TYPE_TEXT = "text";

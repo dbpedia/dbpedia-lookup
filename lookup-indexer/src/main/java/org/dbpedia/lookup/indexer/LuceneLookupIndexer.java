@@ -1,4 +1,4 @@
-package org.dbpedia.lookup;
+package org.dbpedia.lookup.indexer;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +20,7 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericDocValuesField;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
@@ -31,6 +32,10 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
+import org.dbpedia.lookup.Constants;
+import org.dbpedia.lookup.config.IndexConfig;
+import org.dbpedia.lookup.config.IndexField;
 import org.slf4j.Logger;
 
 public class LuceneLookupIndexer {
@@ -197,6 +202,13 @@ public class LuceneLookupIndexer {
 				case Constants.CONFIG_FIELD_TYPE_STORED:
 					doc.add(new StoredField(field, literal));
 					break;
+				case Constants.CONFIG_FIELD_TYPE_STRING:
+					doc.add(new StringField(field, literal, Field.Store.YES));
+					break;
+				case Constants.CONFIG_FIELD_TYPE_STORED_SORTED:
+					doc.add(new StoredField(field, literal));
+					doc.add(new SortedDocValuesField(Constants.FIELD_RESOURCE, new BytesRef(resource)));
+					break;
 				default:
 					doc.add(new TextField(field, literal, Field.Store.YES));
 					break;
@@ -211,6 +223,10 @@ public class LuceneLookupIndexer {
 
 	private Document findDocument(String resource) throws IOException {
 
+		if(resource == null) {
+			return null;
+		}
+
 		if (documentCache.containsKey(resource)) {
 			return documentCache.get(resource);
 		}
@@ -221,8 +237,9 @@ public class LuceneLookupIndexer {
 		if (document == null) {
 			// Second try: create new document, add to cache
 			document = new Document();
-			document.add(new StringField(Constants.FIELD_RESOURCE, resource, Field.Store.YES));
 
+			document.add(new StringField(Constants.FIELD_RESOURCE, resource, Field.Store.YES));
+			document.add(new SortedDocValuesField(Constants.FIELD_RESOURCE, new BytesRef(resource)));
 		}
 
 		documentCache.put(resource, document);
@@ -235,9 +252,6 @@ public class LuceneLookupIndexer {
 			return null;
 		}
 
-		// resourceTerm.set(LuceneLookupSearcher.FIELD_RESOURCE, new
-		// BytesRef(resource));
-
 		Term resourceTerm = new Term(Constants.FIELD_RESOURCE, resource);
 		TermQuery resourceTermQuery = new TermQuery(resourceTerm);
 
@@ -246,9 +260,9 @@ public class LuceneLookupIndexer {
 		if (docs.totalHits > 0) {
 
 			Document document = searcher.doc(docs.scoreDocs[0].doc);
-			document.removeField("resource");
-			document.add(new StringField("resource", resource, Field.Store.YES));
-
+			document.removeFields(Constants.FIELD_RESOURCE);
+			document.add(new StringField(Constants.FIELD_RESOURCE, resource, Field.Store.YES));
+			document.add(new SortedDocValuesField(Constants.FIELD_RESOURCE, new BytesRef(resource)));
 			// Fetched document fields are all reset to default stored/text fields
 			// Special fields such as the numeric fields have to be reset to their
 			// respective type

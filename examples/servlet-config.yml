@@ -14,6 +14,7 @@ queryFields:
     tokenize: true
   - fieldName: label
     weight: 10
+    highlight: true
     tokenize: true
     queryByDefault: true
   - fieldName: placeLabel

@@ -42,6 +42,8 @@ import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.dbpedia.lookup.config.QueryConfig;
+import org.dbpedia.lookup.config.QueryField;
 import org.json.JSONArray;
 import org.json.JSONObject;
 ;
@@ -107,7 +109,6 @@ public class LuceneLookupSearcher {
 		this.formatter = new SimpleHTMLFormatter();
 		this.analyzer = new StandardAnalyzer();
 		
-		
 		createBoostSource(config);
 	}
 
@@ -145,7 +146,8 @@ public class LuceneLookupSearcher {
 	 * @param maxHits max number of search results
 	 * @return
 	 */
-	public JSONObject search(Hashtable<QueryField, String> queryMap, int maxHits, float minRelevance, String fieldFormat) {
+	public JSONObject search(Hashtable<QueryField, String> queryMap, int maxHits, float minRelevance, String fieldFormat,
+		String join) {
 		
 		QueryField[] fields = new QueryField[queryMap.size()];
 		String[] queries = new String[queryMap.size()];
@@ -155,11 +157,10 @@ public class LuceneLookupSearcher {
 		for(Entry<QueryField, String> entry : queryMap.entrySet()) {
 			fields[i] = entry.getKey();
 			queries[i] = entry.getValue();
-			
 			i++;
 		}
 		
-		return search(fields, queries, maxHits, minRelevance, fieldFormat);
+		return search(fields, queries, maxHits, minRelevance, fieldFormat, join);
 	}
 
 	/**
@@ -167,7 +168,8 @@ public class LuceneLookupSearcher {
 	 * @param maxHits The maximum amount of search results
 	 * @return The search results as a string
 	 */
-	public JSONObject search(QueryField[] fields, String[] queries, int maxHits, float minRelevance, String fieldFormat) {
+	public JSONObject search(QueryField[] fields, String[] queries, int maxHits, float minRelevance, String fieldFormat,
+		String join) {
 
 		try {
 			if(fields.length != queries.length) {
@@ -184,32 +186,44 @@ public class LuceneLookupSearcher {
 				String query = queries[i];
 				boolean required = fields[i].isRequired();
 				boolean allowPartialMatch = fields[i].isAllowPartialMatch();
-				
+				boolean isExact = fields[i].isExact();
+			
+			
 				List<String> tokens;
 
 				if(fields[i].tokenize()) {
 					tokens = analyze(query, analyzer);
 				} else {
 					tokens =new ArrayList<String>();
-					tokens.add(query.toLowerCase());
+
+					if(isExact) {
+						tokens.add(query);
+					} else {
+						tokens.add(query.toLowerCase());
+					}
 				}
 
 				BooleanQuery.Builder tokenQueryBuilder = new BooleanQuery.Builder();
 
 				for(String token : tokens) {
 
-					BoostQuery boostQuery = new BoostQuery(createQueryFromToken(field, fields[i].isExact(),
+					Query boostQuery = new BoostQuery(createQueryFromToken(field, fields[i].isExact(),
 							token), fields[i].getWeight());
 					
+					if(join != null) {
+						boostQuery = JoinUtil.createJoinQuery("resource", false, join,
+							boostQuery, this.searcher, ScoreMode.None);
+					}
+
 					tokenQueryBuilder = tokenQueryBuilder.add(boostQuery, allowPartialMatch ? Occur.SHOULD : Occur.MUST);
 				}
-				
+
 				queryBuilder = queryBuilder.add(tokenQueryBuilder.build(), required ? Occur.MUST : Occur.SHOULD);
 			}
 
 			analyzer.close();
 
-			Query query = queryBuilder.build();
+			Query query = queryBuilder.build(); 
 
 			if(boostValueSource != null) {
 				query = FunctionScoreQuery.boostByValue(query, boostValueSource);
