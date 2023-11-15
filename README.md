@@ -4,7 +4,7 @@
 
 The DBpedia Lookup can be used to index and search RDF files or databases. 
 
-The indexer and searcher uses the Lucene framework for the index structures and queries and the Apache Jena framework for RDF and SPARQL parsing and loading, thus supporting a wide range of RDF formats.
+The indexer and searcher uses the Lucene framework for the index structures and queries - and the Apache Jena framework for RDF and SPARQL parsing and loading, thus supporting a wide range of RDF formats.
 
 ## Modules
 
