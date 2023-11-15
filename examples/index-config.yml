@@ -8,10 +8,23 @@ commitInterval: 100
 indexFields:
   - fieldName: label
     resourceName: resource
-    fieldType: string
     query: >
       SELECT ?resource ?label WHERE {
-        ?resource a <http://dbpedia.org/ontology/City> .
-        ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
-        FILTER (LANG(?label) = "en").
-      } LIMIT 1001
+        {
+          ?resource a <http://dbpedia.org/ontology/City> .
+          ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+          FILTER (LANG(?label) = "en").
+        }
+        %VALUES%
+      } LIMIT 10000
+  - fieldName: birthPlace
+    type: uri
+    resourceName: resource
+    query: >
+      SELECT ?resource ?label WHERE {
+        {
+          ?resource a <http://dbpedia.org/ontology/Person> .
+          ?resource <http://dbpedia.org/ontology/birthPlace> ?place .
+        }
+        %VALUES%
+      } LIMIT 10000

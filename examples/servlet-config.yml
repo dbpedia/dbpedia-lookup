@@ -9,7 +9,14 @@ maxResults: 100
 format: JSON
 minRelevanceScore: 0.1
 queryFields:
+  - fieldName: birthPlace
+    weight: 10
+    tokenize: true
   - fieldName: label
     weight: 10
+    tokenize: true
+    queryByDefault: true
+  - fieldName: placeLabel
+    joinTo: birthPlace
     tokenize: true
     queryByDefault: true

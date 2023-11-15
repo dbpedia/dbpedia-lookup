@@ -50,7 +50,7 @@ import org.json.JSONObject;
  * @author Jan Forberg
  *
  */
-public class LuceneLookupSearcher implements ILookupSearcher {
+public class LuceneLookupSearcher {
 
 	public static final String FIELD_DOCUMENTS = "docs";
 	
@@ -301,32 +301,6 @@ public class LuceneLookupSearcher implements ILookupSearcher {
 		return result;
 	}
 
-
-	/**
-	 * Searches the index using a prefix query for auto suggestions
-	 * @param queryString The query string
-	 * @param maxHits THe maximum amount of search results
-	 * @return The search results as a string
-	 * @throws IOException
-	 */
-	/*
-	public String suggest(String queryString, int maxHits) throws IOException {
-
-		Term term = new Term(FIELD_LABEL, queryString.toLowerCase());
-		Query fuzzyQuery = new PrefixQuery(term);
-		Query termQuery = new BoostQuery(new TermQuery(term), exactMatchBoost);
-
-		BooleanQuery booleanQuery = new BooleanQuery.Builder()
-				.add(fuzzyQuery, Occur.SHOULD)
-				.add(termQuery, Occur.SHOULD)
-				.setMinimumNumberShouldMatch(1)
-				.build();
-
-		FunctionScoreQuery scoreQuery = FunctionScoreQuery.boostByValue(booleanQuery, refCountValueSource);
-
-		return runQuery(scoreQuery, maxHits).toString();
-	}*/
-
 	/**
 	 * Runs a query and returns the results as a list of documents
 	 * @param query
@@ -434,7 +408,6 @@ public class LuceneLookupSearcher implements ILookupSearcher {
 		return searcher;
 	}
 
-	@Override
 	public String[] findResourcesWithField(String field, boolean isStored) {
 
 		try {
@@ -468,7 +441,6 @@ public class LuceneLookupSearcher implements ILookupSearcher {
 		}
 	}
 
-	@Override
 	public String[] findLinkedLiterals(String resource, String[] path) {
 
 		try {
@@ -506,7 +478,6 @@ public class LuceneLookupSearcher implements ILookupSearcher {
 		}
 	}
 
-	@Override
 	public void close() {
 		try {
 			reader.close();

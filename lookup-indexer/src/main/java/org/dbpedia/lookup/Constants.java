@@ -30,5 +30,6 @@ public class Constants {
 
 	public static final String CONFIG_FIELD_TYPE_TEXT = "text";
 
+	public static final String CONFIG_FIELD_TYPE_NGRAM = "ngram";
 
 }

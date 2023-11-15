@@ -88,7 +88,6 @@ public class LuceneLookupIndexer {
 
 			if (indexConfig.isCleanIndex()) {
 				String stagingFolderName = "." + UUID.randomUUID().toString();
-
 				indexPath = Paths.get(targetPath).getParent().toString() +
 					File.separator + stagingFolderName;
 				indexDirectory = FSDirectory.open(Paths.get(indexPath));
@@ -134,6 +133,11 @@ public class LuceneLookupIndexer {
 
 			if (fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_STRING)) {
 				analyzerPerField.put(field.getFieldName(), new StringPhraseAnalyzer());
+			}
+
+			if(fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_NGRAM)) {
+
+				analyzerPerField.put(field.getFieldName(), new NGramAnalyzer());
 			}
 		}
 

@@ -23,11 +23,18 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.zookeeper.common.Time;
+import org.dbpedia.lookup.config.QueryConfig;
+import org.dbpedia.lookup.config.QueryField;
 import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * HTTP Servlet with handlers for the single lookup API request "/api/search"
+ * Post-processes requests and sends the query to the LuceneLookupSearcher,
+ * which translates requests into lucene queries
+ */
 public class LookupServlet extends HttpServlet {
 
 	/**
@@ -68,6 +75,8 @@ public class LookupServlet extends HttpServlet {
 
 			String configPath = getInitParameter(CONFIG_PATH);
 			config = QueryConfig.Load(configPath);
+			
+			// Create the searcher that handles the search requests on the index structure
 			searcher = new LuceneLookupSearcher(config.getIndexPath(), config);
 
 		} catch (Exception e) {
@@ -75,10 +84,12 @@ public class LookupServlet extends HttpServlet {
 			// this is logged to catalina.out
 			e.printStackTrace();
 			logger.error(e.toString());
-
 			initializationError = e.toString();
 		}
 
+		// If specified, the json outputs of the API can be transformed into XML
+		// using a template. This has been implemented to support backwards compatibility
+		// with the ancient and long deprecated DBpedia Lookup app
 		TransformerFactory transformerFactory = new net.sf.saxon.TransformerFactoryImpl();
 
 		if (config.getFormatTemplate() != null) {
@@ -105,6 +116,13 @@ public class LookupServlet extends HttpServlet {
 		doPostOrGet(req, resp);
 	}
 
+	/**
+	 * Handler function for any post or get request
+	 * @param req
+	 * @param resp
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	private void doPostOrGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		if (initializationError != null) {

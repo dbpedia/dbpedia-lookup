@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "org.dbpedia.lookup.JettyLookupServer",
             "projectName": "lookup-servlet",
-            "args": "-c ./examples/dbpedia/servlet-config.yml -h ./examples/dbpedia"
+            "args": "-c ./examples/servlet-config.yml -h ./examples/dbpedia"
         },
         {
             "type": "java",
@@ -26,6 +26,14 @@
             "mainClass": "org.dbpedia.lookup.Main",
             "projectName": "lookup-indexer",
             "args": "-c ./examples/index-config.yml"
+        },
+        {
+            "type": "java",
+            "name": "Launch Main with Resource",
+            "request": "launch",
+            "mainClass": "org.dbpedia.lookup.Main",
+            "projectName": "lookup-indexer",
+            "args": "-c ./examples/index-config.yml -r 'http://dbpedia.org/resource/Arcadiopolis_in_Asia http://dbpedia.org/resource/Anaea_(Asia) http://dbpedia.org/resource/Puerto_Asís http://dbpedia.org/resource/Rockville,_Iowa'"
         }
     ]
 }
