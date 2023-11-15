@@ -61,17 +61,17 @@ indexFields:
 
 The configuration fields describe the following:
 
-* *indexPath:* The path of the target folder for the index structure. This can be either an empty folder or a folder containing an already existing index structure.
-* *indexMode:* Has to be one of BUILD_MEM, BUILD_DISK, INDEX_DISK, INDEX_SPARQL_ENDPOINT (see [IndexMode](../lookup-indexer/src/main/java/org/dbpedia/lookup/config/IndexMode.java) and the index mode section below). In this example, we are indexing a knowledge graph through its SPARQL endpoint, hence INDEX_SPARQL_ENDPOINT.
-* *cleanIndex:* Indicates whether we want to start a fresh index structure or extend an existing index.
-* *sparqlEndpoint:* Needs to be specified when *indexMode* is set to INDEX_SPARQL_ENDPOINT. In this example, this points to the SPARQL endpoint of the DBpedia knowledge graph
-* *cacheSize:* Indicates the amount of documents that will be held in memory during indexing. This speeds up the process of adding multiple fields to a single document. This can be limited to avoid excessive RAM usage.
-* *commitInterval:* In the Lucene indexing framework, changes to the index structure are first held in memory and then only written to disk when doing an explicit "commit". The interval denotes the maximum amount of inserts between commits. A lower value results in longer indexing times but saves intermediate results more frequently
-* *indexFields:* The index fields are the core of a lookup indexer configuration. The conist of a list of index field objects that consist of the following:
-  * *fieldName:* The name of the field to be indexed. This is **also** the name of the variable in the query that will hold the field values
-  * *documentVariable:* The name of the variable in the query that will hold the ID of the lucene documents.
-  * *type*: The type of the field in the Lucene document. Please refer to the field type section below. This is an optional field and will default to *text*.
-  * *query:* The query describing the selection of document ID and field value from the target knowledge graph.
+* **indexPath:** The path of the target folder for the index structure. This can be either an empty folder or a folder containing an already existing index structure.
+* **ndexMode:** Has to be one of BUILD_MEM, BUILD_DISK, INDEX_DISK, INDEX_SPARQL_ENDPOINT (see [IndexMode](../lookup-indexer/src/main/java/org/dbpedia/lookup/config/IndexMode.java) and the index mode section below). In this example, we are indexing a knowledge graph through its SPARQL endpoint, hence INDEX_SPARQL_ENDPOINT.
+* **cleanIndex:** Indicates whether we want to start a fresh index structure or extend an existing index.
+* **sparqlEndpoint:** Needs to be specified when *indexMode* is set to INDEX_SPARQL_ENDPOINT. In this example, this points to the SPARQL endpoint of the DBpedia knowledge graph
+* **cacheSize:** Indicates the amount of documents that will be held in memory during indexing. This speeds up the process of adding multiple fields to a single document. This can be limited to avoid excessive RAM usage.
+* **commitInterval:** In the Lucene indexing framework, changes to the index structure are first held in memory and then only written to disk when doing an explicit "commit". The interval denotes the maximum amount of inserts between commits. A lower value results in longer indexing times but saves intermediate results more frequently
+* **indexFields:** The index fields are the core of a lookup indexer configuration. The conist of a list of index field objects that consist of the following:
+  * **fieldName:** The name of the field to be indexed. This is **also** the name of the variable in the query that will hold the field values
+  * **documentVariable:** The name of the variable in the query that will hold the ID of the lucene documents.
+  * **type:** The type of the field in the Lucene document. Please refer to the field type section below. This is an optional field and will default to *text*.
+  * **query:** The query describing the selection of document ID and field value from the target knowledge graph.
 
 
 ### Testing the Queries
