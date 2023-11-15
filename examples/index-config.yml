@@ -3,8 +3,8 @@ indexPath: ./index
 indexMode: INDEX_SPARQL_ENDPOINT
 sparqlEndpoint: https://dbpedia.org/sparql
 cleanIndex: true
-cacheSize: 1000000
-commitInterval: 100
+maxBufferedDocs: 100000
+commitInterval: 1000
 indexFields:
   - fieldName: label
     documentVariable: city

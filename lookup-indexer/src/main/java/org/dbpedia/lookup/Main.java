@@ -388,8 +388,7 @@ public class Main {
 			for (IndexField indexFieldConfig : indexConfig.getIndexFields()) {
 
 				logger.info("=====================================================================");
-				logger.info("Indexing path for field '" + indexFieldConfig.getFieldName() + "' and resource '"
-						+ indexFieldConfig.getDocumentVariable() + "'");
+				logger.info("Indexing path for field '" + indexFieldConfig.getFieldName() + "'");
 				logger.info("=====================================================================");
 
 				Txn.executeRead(conn, () -> {

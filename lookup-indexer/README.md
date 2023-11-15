@@ -25,7 +25,7 @@ and then running the resulting `lookup-indexer-1.0-jar-with-dependencies.jar` fi
 java -jar ./target/lookup-indexer-1.0-jar-with-dependencies.jar -c ../examples/index-config.yml
 ```
 
-### Configuration
+### Example Configuration
 
 The [index configuration](../examples/index-config.yml) looks as follows:
 ```yaml
@@ -34,7 +34,7 @@ indexPath: ./index
 indexMode: INDEX_SPARQL_ENDPOINT
 sparqlEndpoint: https://dbpedia.org/sparql
 cleanIndex: true
-cacheSize: 1000000
+maxBufferedDocs: 100000
 commitInterval: 1000
 indexFields:
   - fieldName: label
@@ -59,14 +59,11 @@ indexFields:
       } LIMIT 10000
 ```
 
-The configuration fields describe the following:
+The configuration fields describe the following (some less important fields are not described here and can be found in the configurations sections below):
 
 * **indexPath:** The path of the target folder for the index structure. This can be either an empty folder or a folder containing an already existing index structure.
-* **ndexMode:** Has to be one of BUILD_MEM, BUILD_DISK, INDEX_DISK, INDEX_SPARQL_ENDPOINT (see [IndexMode](../lookup-indexer/src/main/java/org/dbpedia/lookup/config/IndexMode.java) and the index mode section below). In this example, we are indexing a knowledge graph through its SPARQL endpoint, hence INDEX_SPARQL_ENDPOINT.
-* **cleanIndex:** Indicates whether we want to start a fresh index structure or extend an existing index.
+* **indexMode:** In this example, we are indexing a knowledge graph using its SPARQL endpoint, hence index mode is set to INDEX_SPARQL_ENDPOINT.
 * **sparqlEndpoint:** Needs to be specified when *indexMode* is set to INDEX_SPARQL_ENDPOINT. In this example, this points to the SPARQL endpoint of the DBpedia knowledge graph
-* **cacheSize:** Indicates the amount of documents that will be held in memory during indexing. This speeds up the process of adding multiple fields to a single document. This can be limited to avoid excessive RAM usage.
-* **commitInterval:** In the Lucene indexing framework, changes to the index structure are first held in memory and then only written to disk when doing an explicit "commit". The interval denotes the maximum amount of inserts between commits. A lower value results in longer indexing times but saves intermediate results more frequently
 * **indexFields:** The index fields are the core of a lookup indexer configuration. The conist of a list of index field objects that consist of the following:
   * **fieldName:** The name of the field to be indexed. This is **also** the name of the variable in the query that will hold the field values
   * **documentVariable:** The name of the variable in the query that will hold the ID of the target lucene document.
@@ -101,3 +98,62 @@ Document
 
 A user searching for the string "Berl" over the field *label* will then be able to quickly retrieve the entire document, since the label field value partially matches the search string.
 
+## Configurations
+
+### indexPath
+**[Required]** The path of the target folder for the index structure. This can be either an empty folder or a folder containing an already existing index structure.
+
+### dataPath
+**[Optional]** This variable is only required when indexing the contents of RDF files. Points to the folder containing the files to index.
+
+### databasePath
+**[Optional]** This variable is only required when running with either build mode [BUILD_AND_INDEX_ON_DISK](#build_and_index_on_disk) or [INDEX_ON_DISK](#index_on_disk). Specifies the path of the on-disk graph database which is required for both modes.
+
+### sparqlEndpoint 
+**[Optional]** Only needs to be specified when [indexMode](#indexmode) is set to [INDEX_SPARQL_ENDPOINT](#index_sparql_endpoint). Specifies the target SPARQL endpoint URL.
+
+### indexMode
+**[Required]** Defines the indexing approach. Has to be one of [INDEX_IN_MEMORY](#index_in_memory), [BUILD_AND_INDEX_ON_DISK](#build_and_index_on_disk), [INDEX_ON_DISK](#index_on_disk) or [INDEX_SPARQL_ENDPOINT](#index_sparql_endpoint) (see enum [IndexMode](../lookup-indexer/src/main/java/org/dbpedia/lookup/config/IndexMode.java)). The index modes change the behaviour of the lookup indexer as follows:
+
+#### INDEX_IN_MEMORY
+The indexer loads the content of the RDF files defined at [dataPath](#datapath) into an in-memory graph database, which is then used to execute the configured SPARQL queries. Only works for small to medium files, since the index structure can eat up a lot of RAM.
+
+#### BUILD_AND_INDEX_ON_DISK
+Similar to [INDEX_IN_MEMORY](#index_in_memory), but the graph database is created on-disk (see [TDB2](https://jena.apache.org/documentation/tdb2/)). This takes considerably more time and makes querying slower but can handle much larger files, since disk space is generally more abundant than memory. The on-disk graph database will be created at the path specified in *databasePath**
+
+#### INDEX_ON_DISK
+Same as [BUILD_AND_INDEX_ON_DISK](#build_and_index_on_disk) but skips the on-disk graph database creation step. This mode tries to load an existing on-disk graph database from [databasePath](#databasepath) as a SPARQL query target.
+
+#### INDEX_SPARQL_ENDPOINT
+Runs the configured queries against the SPARQL endpoint URL specified in [sparqlEndpoint](#sparqlendpoint).
+
+### cleanIndex
+**[Required]** Indicates whether to start a fresh index structure or extend an existing index. Setting cleanIndex to `true` will clear the directory specified in [indexPath](#indexpath) before starting the indexing process.
+
+### maxBufferedDocs
+**[Required]** Configuration value passed to the lucene indexer (see [setMaxBufferedDocs()](https://lucene.apache.org/core/8_1_1/core/org/apache/lucene/index/IndexWriterConfig.html#setMaxBufferedDocs-int-)).
+
+### commitInterval
+**[Required]** In the Lucene indexing framework, changes to the index structure are first held in memory and then only written to disk when doing an explicit "commit". The interval denotes the maximum amount of edits between commits. A lower value results in longer indexing times but saves intermediate results more frequently. Usually set to values between 1000 to 10000.
+
+### indexFields
+The index fields are the core of a lookup indexer configuration. The consist of a list of index field objects that have the following subfields:
+
+#### fieldName
+The name of the field to be indexed. This is **also** the name of the variable in the query that will hold the field values
+#### documentVariable
+The name of the variable in the query that will hold the ID of the target lucene document. Has to match one of the binding variables selected in [query](#query).
+#### query
+The SPARQL select query describing the selection of document ID and field value from the target knowledge graph. The binding variables of the select query must contain variable names matching the values specified in [fieldName](#fieldname) and [documentVariable](#documentvariable).
+#### type
+The type of the index field. Influences how the value selected by the [query](#query) is tokenized and saved. Defaults to [text](#text) and may have one of the following values:
+
+##### text
+The field will be indexed and tokenized, which is useful for indexing any text with multiple words. Search queries can then return matches for each word.
+
+##### string
+The field will be indexed but *not* tokenized. Useful for identifiers that should only match in its entirety. The field value will be indexed in its lowercase form.
+
+##### stored
+##### ngram
+##### numeric

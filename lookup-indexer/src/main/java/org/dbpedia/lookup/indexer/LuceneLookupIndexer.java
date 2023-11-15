@@ -66,13 +66,6 @@ public class LuceneLookupIndexer {
 
 	private String lastValue = null;
 
-	/**
-	 * Creates a new lucene lookup indexer
-	 * 
-	 * @param filePath       File path to use for indexing
-	 * @param updateInterval Max amount of updates before a commit
-	 * @param cacheSize      Max cache size
-	 */
 	public LuceneLookupIndexer(IndexConfig indexConfig, Logger logger) {
 
 		this.logger = logger;
@@ -120,7 +113,7 @@ public class LuceneLookupIndexer {
 	private IndexWriterConfig createWriterConfig() {
 		IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
 		indexWriterConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-		indexWriterConfig.setMaxBufferedDocs(indexConfig.getCacheSize());
+		indexWriterConfig.setMaxBufferedDocs(indexConfig.getMaxBufferedDocs());
 		return indexWriterConfig;
 	}
 
@@ -313,13 +306,6 @@ public class LuceneLookupIndexer {
 
 			documentCache = new ConcurrentHashMap<String, Document>();
 			searcher = new IndexSearcher(DirectoryReader.open(indexDirectory));
-
-			// index = FSDirectory.open(new File(indexPath).toPath());
-			// indexWriter = new IndexWriter(indexDirectory, createWriterConfig());
-
-			// IndexReader reader = DirectoryReader.open(indexDirectory);
-			// searcher = new IndexSearcher(reader);
-			// documentCache = new ConcurrentHashMap<String, Document>();
 
 			System.gc();
 

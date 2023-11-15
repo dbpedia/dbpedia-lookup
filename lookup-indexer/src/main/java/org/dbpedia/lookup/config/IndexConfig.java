@@ -33,7 +33,7 @@ public class IndexConfig {
 
 	private boolean cleanIndex;
 
-	private int cacheSize;
+	private int maxBufferedDocs;
 
 	private int commitInterval;
 
@@ -77,12 +77,12 @@ public class IndexConfig {
 		this.indexPath = indexPath;
 	}
 
-	public int getCacheSize() {
-		return cacheSize;
+	public int getMaxBufferedDocs() {
+		return maxBufferedDocs;
 	}
 
-	public void setCacheSize(int cacheSize) {
-		this.cacheSize = cacheSize;
+	public void setMaxBufferedDocs(int maxBufferedDocs) {
+		this.maxBufferedDocs = maxBufferedDocs;
 	}
 
 	public int getCommitInterval() {
