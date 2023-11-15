@@ -1,6 +1,7 @@
-package org.dbpedia.lookup;
+package org.dbpedia.lookup.config;
 
 import java.io.File;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 

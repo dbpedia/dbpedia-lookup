@@ -1,4 +1,4 @@
-package org.dbpedia.lookup;
+package org.dbpedia.lookup.config;
 
 public class QueryField {
 		

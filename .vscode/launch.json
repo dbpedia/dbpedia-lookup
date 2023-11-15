@@ -6,22 +6,15 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch JettyLookupServer",
+            "name": "Launch Jetty Lookup Server",
             "request": "launch",
             "mainClass": "org.dbpedia.lookup.JettyLookupServer",
             "projectName": "lookup-servlet",
-            "args": "-c ./examples/servlet-config.yml -h ./examples/dbpedia"
+            "args": "-c ./examples/servlet-config.yml -h ./examples/"
         },
         {
             "type": "java",
-            "name": "Launch Current File",
-            "request": "launch",
-            "mainClass": "${file}",
-            "args": "-c ./examples/index-config.yml -"
-        },
-        {
-            "type": "java",
-            "name": "Launch Main",
+            "name": "Launch Index Main",
             "request": "launch",
             "mainClass": "org.dbpedia.lookup.Main",
             "projectName": "lookup-indexer",
@@ -29,7 +22,7 @@
         },
         {
             "type": "java",
-            "name": "Launch Main with Resource",
+            "name": "Launch Index Main with Resource",
             "request": "launch",
             "mainClass": "org.dbpedia.lookup.Main",
             "projectName": "lookup-indexer",

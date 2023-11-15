@@ -1,14 +1,14 @@
-package org.dbpedia.lookup;
+package org.dbpedia.lookup.config;
 
 public class IndexField {
 	
 	private String fieldName;
 		
-	private String resourceName;
+	private String documentVariable;
 	
 	private String query;
 	
-	private String fieldType;
+	private String type;
 
 	public String getFieldName() {
 		return fieldName;
@@ -18,12 +18,12 @@ public class IndexField {
 		this.fieldName = fieldName;
 	}
 
-	public String getResourceName() {
-		return resourceName;
+	public String getDocumentVariable() {
+		return documentVariable;
 	}
 
-	public void setResourceName(String resourceName) {
-		this.resourceName = resourceName;
+	public void setDocumentVariable(String documentVariable) {
+		this.documentVariable = documentVariable;
 	}
 
 	public String getQuery() {
@@ -34,11 +34,11 @@ public class IndexField {
 		this.query = query;
 	}
 
-	public String getFieldType() {
-		return fieldType;
+	public String getType() {
+		return type;
 	}
 
-	public void setFieldType(String fieldType) {
-		this.fieldType = fieldType;
+	public void setType(String type) {
+		this.type = type;
 	}
 }

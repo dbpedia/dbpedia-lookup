@@ -1,4 +1,4 @@
-package org.dbpedia.lookup;
+package org.dbpedia.lookup.config;
 
 import java.io.File;
 import java.util.List;

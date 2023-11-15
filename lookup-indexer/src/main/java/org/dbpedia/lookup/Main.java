@@ -122,7 +122,7 @@ public class Main {
 			try {
 				mode = Enum.valueOf(IndexMode.class, indexConfig.getIndexMode());
 			} catch (Exception e) {
-				logger.info("Unkown specified index mode, exiting. Use either BUILD_MEM, BUILD_DISK, INDEX_DISK or INDEX_SPARQL.");
+				logger.info("Unkown specified index mode, exiting. Use either BUILD_MEM, BUILD_DISK, INDEX_DISK or INDEX_SPARQL_ENDPOINT.");
 				return;
 			}
 
@@ -202,7 +202,7 @@ public class Main {
 		// 
 		for (IndexField field : indexConfig.getIndexFields()) {
 			String query = field.getQuery();
-			String resourceName = field.getResourceName();
+			String resourceName = field.getDocumentVariable();
 
 			String valuesClause = "";
 
@@ -234,7 +234,7 @@ public class Main {
 
 			logger.info("=====================================================================");
 			logger.info("Indexing path for field '" + indexFieldConfig.getFieldName() + "' and resource '"
-					+ indexFieldConfig.getResourceName() + "'");
+					+ indexFieldConfig.getDocumentVariable() + "'");
 			logger.info("=====================================================================");
 
 			try (QueryExecution qexec = QueryExecutionFactory.sparqlService(xmlConfig.getSparqlEndpoint(),
@@ -390,7 +390,7 @@ public class Main {
 
 				logger.info("=====================================================================");
 				logger.info("Indexing path for field '" + indexFieldConfig.getFieldName() + "' and resource '"
-						+ indexFieldConfig.getResourceName() + "'");
+						+ indexFieldConfig.getDocumentVariable() + "'");
 				logger.info("=====================================================================");
 
 				Txn.executeRead(conn, () -> {

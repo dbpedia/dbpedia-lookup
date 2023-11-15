@@ -130,7 +130,7 @@ public class LuceneLookupIndexer {
 
 		for (IndexField field : indexConfig.getIndexFields()) {
 
-			String fieldType = field.getFieldType();
+			String fieldType = field.getType();
 
 			if (fieldType == null) {
 				continue;
@@ -141,7 +141,6 @@ public class LuceneLookupIndexer {
 			}
 
 			if(fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_NGRAM)) {
-
 				analyzerPerField.put(field.getFieldName(), new NGramAnalyzer());
 			}
 		}
@@ -157,15 +156,15 @@ public class LuceneLookupIndexer {
 		while (result.hasNext()) {
 
 			QuerySolution entry = result.next();
-			RDFNode resource = entry.get(path.getResourceName());
-			RDFNode value = entry.get(path.getFieldName());
+			RDFNode documentNode = entry.get(path.getDocumentVariable());
+			RDFNode fieldValueNode = entry.get(path.getFieldName());
 
-			lastResource = resource.toString();
+			lastResource = documentNode.toString();
 
-			if (value.isLiteral()) {
-				lastValue = value.asLiteral().getString();
+			if (fieldValueNode.isLiteral()) {
+				lastValue = fieldValueNode.asLiteral().getString();
 			} else {
-				lastValue = value.toString();
+				lastValue = fieldValueNode.toString();
 			}
 
 			indexField(lastResource, path, lastValue);
@@ -181,7 +180,7 @@ public class LuceneLookupIndexer {
 	public void indexField(String resource, IndexField path, String literal) {
 
 		String field = path.getFieldName();
-		String fieldType = path.getFieldType();
+		String fieldType = path.getType();
 
 		if (fieldType != null) {
 			fieldType = fieldType.toLowerCase();
@@ -268,7 +267,7 @@ public class LuceneLookupIndexer {
 			// respective type
 			for (IndexField field : indexConfig.getIndexFields()) {
 
-				String fieldType = field.getFieldType();
+				String fieldType = field.getType();
 
 				if (fieldType == null) {
 					continue;
