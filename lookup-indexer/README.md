@@ -69,7 +69,7 @@ The configuration fields describe the following:
 * **commitInterval:** In the Lucene indexing framework, changes to the index structure are first held in memory and then only written to disk when doing an explicit "commit". The interval denotes the maximum amount of inserts between commits. A lower value results in longer indexing times but saves intermediate results more frequently
 * **indexFields:** The index fields are the core of a lookup indexer configuration. The conist of a list of index field objects that consist of the following:
   * **fieldName:** The name of the field to be indexed. This is **also** the name of the variable in the query that will hold the field values
-  * **documentVariable:** The name of the variable in the query that will hold the ID of the lucene documents.
+  * **documentVariable:** The name of the variable in the query that will hold the ID of the target lucene document.
   * **type:** The type of the field in the Lucene document. Please refer to the field type section below. This is an optional field and will default to *text*.
   * **query:** The query describing the selection of document ID and field value from the target knowledge graph.
 
