@@ -1,4 +1,4 @@
-# DBpedia Lookup - Generic RDF Indexer
+# DBpedia Lookup - Generic RDF Indexer & Searcher
 
 ## About
 
