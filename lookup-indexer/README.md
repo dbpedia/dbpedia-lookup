@@ -10,7 +10,7 @@ A Lucene index can be understood as a collection of documents. Each document has
 
 ## Quickstart Example
 
-The [examples folder](../examples/) contains configuration files for a search index over a part of the DBpedia knowledge graph (using [https://dbpedia.org/sparql](https://dbpedia.org/sparql)). This document will only discuss the index configuration. The servlet configuration will be addressed in the [servlet documentation](../lookup-servlet/README.md).
+The [examples folder](../examples/) contains configuration files for a search index over a part of the DBpedia knowledge graph (using [https://dbpedia.org/sparql](https://dbpedia.org/sparql)). This document will only discuss the index configuration. The searcher configuration will be addressed in the [searcher documentation](../lookup-searcher/README.md).
 
 ### Running the Example:
 
@@ -98,22 +98,22 @@ Document
 
 A user searching for the string "Berl" over the field *label* will then be able to quickly retrieve the entire document, since the label field value partially matches the search string.
 
-## Configurations
+## Configuration
 
 ### indexPath
-**[Required]** The path of the target folder for the index structure. This can be either an empty folder or a folder containing an already existing index structure.
+The path of the target folder for the index structure. This can be either an empty folder or a folder containing an already existing index structure.
 
 ### dataPath
-**[Optional]** This variable is only required when indexing the contents of RDF files. Points to the folder containing the files to index.
+*[Optional]* This variable is only required when indexing the contents of RDF files. Points to the folder containing the files to index.
 
 ### databasePath
-**[Optional]** This variable is only required when running with either build mode [BUILD_AND_INDEX_ON_DISK](#build_and_index_on_disk) or [INDEX_ON_DISK](#index_on_disk). Specifies the path of the on-disk graph database which is required for both modes.
+*[Optional]* This variable is only required when running with either build mode [BUILD_AND_INDEX_ON_DISK](#build_and_index_on_disk) or [INDEX_ON_DISK](#index_on_disk). Specifies the path of the on-disk graph database which is required for both modes.
 
 ### sparqlEndpoint 
-**[Optional]** Only needs to be specified when [indexMode](#indexmode) is set to [INDEX_SPARQL_ENDPOINT](#index_sparql_endpoint). Specifies the target SPARQL endpoint URL.
+*[Optional]* Only needs to be specified when [indexMode](#indexmode) is set to [INDEX_SPARQL_ENDPOINT](#index_sparql_endpoint). Specifies the target SPARQL endpoint URL.
 
 ### indexMode
-**[Required]** Defines the indexing approach. Has to be one of [INDEX_IN_MEMORY](#index_in_memory), [BUILD_AND_INDEX_ON_DISK](#build_and_index_on_disk), [INDEX_ON_DISK](#index_on_disk) or [INDEX_SPARQL_ENDPOINT](#index_sparql_endpoint) (see enum [IndexMode](../lookup-indexer/src/main/java/org/dbpedia/lookup/config/IndexMode.java)). The index modes change the behaviour of the lookup indexer as follows:
+Defines the indexing approach. Has to be one of [INDEX_IN_MEMORY](#index_in_memory), [BUILD_AND_INDEX_ON_DISK](#build_and_index_on_disk), [INDEX_ON_DISK](#index_on_disk) or [INDEX_SPARQL_ENDPOINT](#index_sparql_endpoint) (see enum [IndexMode](../lookup-indexer/src/main/java/org/dbpedia/lookup/config/IndexMode.java)). The index modes change the behaviour of the lookup indexer as follows:
 
 #### INDEX_IN_MEMORY
 The indexer loads the content of the RDF files defined at [dataPath](#datapath) into an in-memory graph database, which is then used to execute the configured SPARQL queries. Only works for small to medium files, since the index structure can eat up a lot of RAM.
@@ -128,13 +128,13 @@ Same as [BUILD_AND_INDEX_ON_DISK](#build_and_index_on_disk) but skips the on-dis
 Runs the configured queries against the SPARQL endpoint URL specified in [sparqlEndpoint](#sparqlendpoint).
 
 ### cleanIndex
-**[Required]** Indicates whether to start a fresh index structure or extend an existing index. Setting cleanIndex to `true` will clear the directory specified in [indexPath](#indexpath) before starting the indexing process.
+Indicates whether to start a fresh index structure or extend an existing index. Setting cleanIndex to `true` will clear the directory specified in [indexPath](#indexpath) before starting the indexing process.
 
 ### maxBufferedDocs
-**[Required]** Configuration value passed to the lucene indexer (see [setMaxBufferedDocs()](https://lucene.apache.org/core/8_1_1/core/org/apache/lucene/index/IndexWriterConfig.html#setMaxBufferedDocs-int-)).
+Configuration value passed to the lucene indexer (see [setMaxBufferedDocs()](https://lucene.apache.org/core/8_1_1/core/org/apache/lucene/index/IndexWriterConfig.html#setMaxBufferedDocs-int-)).
 
 ### commitInterval
-**[Required]** In the Lucene indexing framework, changes to the index structure are first held in memory and then only written to disk when doing an explicit "commit". The interval denotes the maximum amount of edits between commits. A lower value results in longer indexing times but saves intermediate results more frequently. Usually set to values between 1000 to 10000.
+In the Lucene indexing framework, changes to the index structure are first held in memory and then only written to disk when doing an explicit "commit". The interval denotes the maximum amount of edits between commits. A lower value results in longer indexing times but saves intermediate results more frequently. Usually set to values between 1000 to 10000.
 
 ### indexFields
 The index fields are the core of a lookup indexer configuration. The consist of a list of index field objects that have the following subfields:
@@ -155,5 +155,10 @@ The field will be indexed and tokenized, which is useful for indexing any text w
 The field will be indexed but *not* tokenized. Useful for identifiers that should only match in its entirety. The field value will be indexed in its lowercase form.
 
 ##### stored
+Creates a field that is stored but not indexed. No changes to the string are applied.
+
 ##### ngram
+Uses the [NGramAnalyzer](./src/main/java/org/dbpedia/lookup/indexer/NGramAnalyzer.java) to tokenize strings into ngrams of lengths between 3 and 5 characters.
+
 ##### numeric
+Saves the file as a numeric field. Numeric field can be used in arithmetic operations during query time.

@@ -9,8 +9,8 @@
             "name": "Launch Jetty Lookup Server",
             "request": "launch",
             "mainClass": "org.dbpedia.lookup.JettyLookupServer",
-            "projectName": "lookup-servlet",
-            "args": "-c ./examples/servlet-config.yml -h ./examples/"
+            "projectName": "lookup-searcher",
+            "args": "-c ./examples/search-config.yml"
         },
         {
             "type": "java",

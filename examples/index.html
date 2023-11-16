@@ -142,11 +142,10 @@
             for (var d in response.docs) {
                 var doc = response.docs[d];
                 var div = document.createElement('div');
-                div.innerHTML =  doc.label[0] + " - <a target='_blank' href='" + doc.resource + "'>" + doc.resource + "</a>";
+                div.innerHTML =  doc.label[0] + " - <a target='_blank' href='" + doc.id + "'>" + doc.id + "</a>";
                 responsePanel.appendChild(div)
             }
         }
-      
        
         function search() {
             // Change this to YOUR lookup url

@@ -41,8 +41,6 @@ public class JettyLookupServer {
 
     private static final String CLI_OPT_HOME_HELP = "The path of the index.html";
 
-    private static final String CLI_OPT_RESOURCE_BASE_PATH_DEFAULT = "./webapp";
-
     private static final String CLI_OPT_PORT = "p";
 
     private static final String CLI_OPT_PORT_LONG = "port";
@@ -63,7 +61,7 @@ public class JettyLookupServer {
 
         log = LoggerFactory.getLogger(JettyLookupServer.class);
         String configPath = null;
-        String resourceBasePath = CLI_OPT_RESOURCE_BASE_PATH_DEFAULT;
+        String resourceBasePath = null;
         int port = 8082;
 
         Options options = new Options();
@@ -104,6 +102,11 @@ public class JettyLookupServer {
         } catch(Exception e) {
             log.error("Unable to load the config file:");
             log.error(e.getMessage());
+        }
+
+        if(resourceBasePath == null) {
+            File configFile = new File(configPath);
+            resourceBasePath = configFile.getParent().toString();
         }
 
         server = new Server(port);

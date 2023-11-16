@@ -1,5 +1,6 @@
 package org.dbpedia.lookup;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -78,9 +79,13 @@ public class LookupServlet extends HttpServlet {
 
 			String configPath = getInitParameter(CONFIG_PATH);
 			config = QueryConfig.Load(configPath);
-			
+
+			File configFile = new File(configPath);
+			String configDirectory = configFile.getParent();
+
+			String indexPath = configDirectory + "/" + config.getIndexPath();
 			// Create the searcher that handles the search requests on the index structure
-			searcher = new LuceneLookupSearcher(config.getIndexPath(), config);
+			searcher = new LuceneLookupSearcher(indexPath, config);
 
 		} catch (Exception e) {
 

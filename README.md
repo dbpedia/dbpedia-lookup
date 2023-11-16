@@ -10,7 +10,7 @@ The indexer and searcher uses the Lucene framework for the index structures and 
 
 This software is split up into two modules:
 * **Lookup-Indexer:** Index-time java program utilizing Apache Jena, Lucene and SPARQL queries to create an index structure. You can find an extensive documentation [here](./lookup-indexer/README.md).
-* **Lookup-Servlet:** Lightweight jetty-based server hosting a HTTP-servlet that answers search requests over the index structure built with the Lookup-Indexer. The full documentation of the servlet can be found [here](./lookup-servlet/README.md)
+* **Lookup-Searcher:** Lightweight jetty-based server hosting a HTTP-servlet that answers search requests over the index structure built with the Lookup-Indexer. The full documentation of the searcher can be found [here](./lookup-searcher/README.md)
 
 ## Discussion
 
