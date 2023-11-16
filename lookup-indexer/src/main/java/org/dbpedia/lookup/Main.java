@@ -140,9 +140,14 @@ public class Main {
 			// Initialize ARQ
 			ARQ.init();
 
-			File configFile = new File(configPath);
-			String configDirectory = configFile.getParent();
-			String indexPath = configDirectory + "/" + indexConfig.getIndexPath();
+			String indexPath = indexConfig.getIndexPath();
+			File indexFile = new File(indexPath);
+
+			if (!indexFile.isAbsolute()) {
+				File configFile = new File(configPath);
+				String configDirectory = configFile.getParent();
+				indexPath = configDirectory + "/" + indexConfig.getIndexPath();
+			}
 
 			// Switch over the index mode to execute on of the following methods:
 			switch (mode) {
@@ -237,7 +242,7 @@ public class Main {
 	 * @param xmlConfig
 	 */
 	private static void indexSparqlEndpoint(String indexPath, IndexConfig xmlConfig) {
-		
+
 		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(indexPath, xmlConfig, logger);
 
 		try {
@@ -264,7 +269,7 @@ public class Main {
 			lookupIndexer.finish();
 		} catch (Exception e) {
 			lookupIndexer.cleanUp();
-			throw(e);
+			throw (e);
 		}
 	}
 

@@ -58,7 +58,7 @@ The [queryFields](#queryfields) variable holds the most important information wi
 ## Configuration
 
 ### indexPath
-The index path points to the directory holding the index structure (usually the result of the lookup indexer).
+The index path points to the directory holding the index structure (*absolute* or *relative to the configuration file*). This is usually the folder containing the result of the lookup indexer.
 
 ### exactMathBoost
 Denotes a multiplier that is applied to any result score if the search term matches a document field value exactly. Can be overriden via HTTP query parameter (e.g. `...&exactMathBoost=100`).
@@ -99,12 +99,16 @@ The minimum score that a potential search result has to reach in order to be inc
 *[Optional]* An mathematical function that will be applied to result documents based on any numeric field indexed to that document.
 
 ### queryFields
+A list of objects describing the query fields on which the searcher will operate. The objects consist of the following subfields:
 
 #### fieldName
+The name of the field. The field name can be used as a query parameter.
 
 #### aliases
+A list of strings specifying alternative names for a field name
 
 #### weight
+A numerical weight that is applied to a match on the respective field. E.g. can be used to express, that a match on a `title` field is worth more than a match on an `abstract` field.
 
 #### highlight
 Denotes whether the result should include special html tags highlighting the match between the query string and the field value. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Highlight` (e.g. `...&labelHighlight=true` when searching on the field `label`).
@@ -121,3 +125,15 @@ If `true`, a match on this field only counts if the field value matches the quer
 #### allowPartialMatch
 
 #### queryByDefault
+If `true`, all queries sent with the [query](#query) parameter will be matched against this field.
+
+## Query Parameters
+
+### query
+The most important parameter: the search query string
+
+### [fieldName]
+Any configured field name can be used as a query parameter. The string specified with this parameter will only be matched against the respective field.
+
+### join
+Join can specify any indexed field. The search will then be executed normally but the initial result set will not be returned. Instead, Lucene will return all documents that have a value for the specified field equal to any document id in the initial result set (simplified Lucene join).

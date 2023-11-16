@@ -101,7 +101,7 @@ A user searching for the string "Berl" over the field *label* will then be able 
 ## Configuration
 
 ### indexPath
-The path of the target folder for the index structure (*abolute* or *relative to the configuration file*). This can be either an empty folder or a folder containing an already existing index structure.
+The path of the target folder for the index structure (*absolute* or *relative to the configuration file*). This can be either an empty folder or a folder containing an already existing index structure.
 
 ### dataPath
 *[Optional]* This variable is only required when indexing the contents of RDF files. Points to the folder containing the files to index.

@@ -49,7 +49,7 @@ public class LookupServlet extends HttpServlet {
 
 	private LuceneLookupSearcher searcher;
 
-	private QueryConfig config;
+	private QueryConfig searchConfig;
 
 	private Transformer xformer;
 
@@ -78,14 +78,19 @@ public class LookupServlet extends HttpServlet {
 			initializationError = null;
 
 			String configPath = getInitParameter(CONFIG_PATH);
-			config = QueryConfig.Load(configPath);
+			searchConfig = QueryConfig.Load(configPath);
 
-			File configFile = new File(configPath);
-			String configDirectory = configFile.getParent();
-			String indexPath = configDirectory + "/" + config.getIndexPath();
+			String indexPath = searchConfig.getIndexPath();
+			File indexFile = new File(indexPath);
+
+			if (!indexFile.isAbsolute()) {
+				File configFile = new File(configPath);
+				String configDirectory = configFile.getParent();
+				indexPath = configDirectory + "/" + searchConfig.getIndexPath();
+			}
 
 			// Create the searcher that handles the search requests on the index structure
-			searcher = new LuceneLookupSearcher(indexPath, config);
+			searcher = new LuceneLookupSearcher(indexPath, searchConfig);
 
 		} catch (Exception e) {
 			// this is logged to catalina.out
@@ -99,11 +104,11 @@ public class LookupServlet extends HttpServlet {
 		// with the ancient and long deprecated DBpedia Lookup app
 		TransformerFactory transformerFactory = new net.sf.saxon.TransformerFactoryImpl();
 
-		if (config.getFormatTemplate() != null) {
+		if (searchConfig.getFormatTemplate() != null) {
 
 			try {
 				Templates formatTemplate = transformerFactory.newTemplates(new StreamSource(
-						new FileInputStream(config.getFormatTemplate())));
+						new FileInputStream(searchConfig.getFormatTemplate())));
 
 				xformer = formatTemplate.newTransformer();
 			} catch (TransformerConfigurationException | FileNotFoundException e1) {
@@ -141,14 +146,14 @@ public class LookupServlet extends HttpServlet {
 
 		Hashtable<QueryField, String> queryMap = createQueryMap(req, query);
 
-		int maxResults = getIntParamter(req, PARAM_MAX_RESULTS, config.getMaxResults());
+		int maxResults = getIntParamter(req, PARAM_MAX_RESULTS, searchConfig.getMaxResults());
 
-		if (config.getMaxResultsCap() > 0) {
-			maxResults = Math.min(maxResults, config.getMaxResultsCap());
+		if (searchConfig.getMaxResultsCap() > 0) {
+			maxResults = Math.min(maxResults, searchConfig.getMaxResultsCap());
 		}
 
-		String format = getStringParamter(req, PARAM_FORMAT, config.getFormat());
-		float minRelevance = getFloatParamter(req, PARAM_MIN_RELEVANCE, config.getMinRelevanceScore());
+		String format = getStringParamter(req, PARAM_FORMAT, searchConfig.getFormat());
+		float minRelevance = getFloatParamter(req, PARAM_MIN_RELEVANCE, searchConfig.getMinRelevanceScore());
 
 		if (format == null || format.equals("")) {
 			format = QueryConfig.CONFIG_FIELD_FORMAT_XML;
@@ -209,7 +214,7 @@ public class LookupServlet extends HttpServlet {
 
 		Hashtable<QueryField, String> result = new Hashtable<QueryField, String>();
 
-		QueryField[] queryFields = config.getQueryFields();
+		QueryField[] queryFields = searchConfig.getQueryFields();
 
 		for (int i = 0; i < queryFields.length; i++) {
 
