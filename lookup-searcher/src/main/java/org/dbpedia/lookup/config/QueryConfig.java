@@ -184,5 +184,9 @@ public class QueryConfig {
   
 		return config;
 	}
+
+    public QueryConfig copy() {
+        return null;
+    }
 }
 

@@ -26,6 +26,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.zookeeper.common.Time;
 import org.dbpedia.lookup.config.QueryConfig;
 import org.dbpedia.lookup.config.QueryField;
+import org.dbpedia.lookup.config.QuerySettings;
 import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
@@ -47,24 +48,23 @@ public class LookupServlet extends HttpServlet {
 
 	public static final String QUERY_SUFFIX_REQUIRED = "Required";
 
+	public static final String QUERY_SUFFIX_EXACT = "Exact";
+
+	public static final String QUERY_EXACT_MATCH_BOOST = "exactMatchBoost";
+
+	public static final String QUERY_PREFIX_MATCH_BOOST = "prefixMatchBoost";
+
 	private LuceneLookupSearcher searcher;
 
-	private QueryConfig searchConfig;
+	private QueryConfig queryConfig;
 
 	private Transformer xformer;
 
 	public static final String CONFIG_PATH = "configpath";
 
-	private static final String[] PARAM_MAX_RESULTS = { "MaxHits", "maxResults" };
-
-	private static final String[] PARAM_FORMAT = { "format" };
-
 	private static final String[] PARAM_QUERY = { "QueryString", "query" };
 
 	private static final String[] PARAM_JOIN = { "join" };
-
-
-	private static final String[] PARAM_MIN_RELEVANCE = { "minRelevance" };
 
 	private String initializationError;
 
@@ -78,19 +78,19 @@ public class LookupServlet extends HttpServlet {
 			initializationError = null;
 
 			String configPath = getInitParameter(CONFIG_PATH);
-			searchConfig = QueryConfig.Load(configPath);
+			queryConfig = QueryConfig.Load(configPath);
 
-			String indexPath = searchConfig.getIndexPath();
+			String indexPath = queryConfig.getIndexPath();
 			File indexFile = new File(indexPath);
 
 			if (!indexFile.isAbsolute()) {
 				File configFile = new File(configPath);
 				String configDirectory = configFile.getParent();
-				indexPath = configDirectory + "/" + searchConfig.getIndexPath();
+				indexPath = configDirectory + "/" + queryConfig.getIndexPath();
 			}
 
 			// Create the searcher that handles the search requests on the index structure
-			searcher = new LuceneLookupSearcher(indexPath, searchConfig);
+			searcher = new LuceneLookupSearcher(indexPath, queryConfig);
 
 		} catch (Exception e) {
 			// this is logged to catalina.out
@@ -100,15 +100,16 @@ public class LookupServlet extends HttpServlet {
 		}
 
 		// If specified, the json outputs of the API can be transformed into XML
-		// using a template. This has been implemented to support backwards compatibility
+		// using a template. This has been implemented to support backwards
+		// compatibility
 		// with the ancient and long deprecated DBpedia Lookup app
 		TransformerFactory transformerFactory = new net.sf.saxon.TransformerFactoryImpl();
 
-		if (searchConfig.getFormatTemplate() != null) {
+		if (queryConfig.getFormatTemplate() != null) {
 
 			try {
 				Templates formatTemplate = transformerFactory.newTemplates(new StreamSource(
-						new FileInputStream(searchConfig.getFormatTemplate())));
+						new FileInputStream(queryConfig.getFormatTemplate())));
 
 				xformer = formatTemplate.newTransformer();
 			} catch (TransformerConfigurationException | FileNotFoundException e1) {
@@ -130,6 +131,7 @@ public class LookupServlet extends HttpServlet {
 
 	/**
 	 * Handler function for any post or get request
+	 * 
 	 * @param req
 	 * @param resp
 	 * @throws ServletException
@@ -144,26 +146,16 @@ public class LookupServlet extends HttpServlet {
 		String query = getStringParamter(req, PARAM_QUERY, null);
 		String join = getStringParamter(req, PARAM_JOIN, null);
 
+		QuerySettings settings = new QuerySettings(queryConfig);
+		settings.parse(req);
+
 		Hashtable<QueryField, String> queryMap = createQueryMap(req, query);
-
-		int maxResults = getIntParamter(req, PARAM_MAX_RESULTS, searchConfig.getMaxResults());
-
-		if (searchConfig.getMaxResultsCap() > 0) {
-			maxResults = Math.min(maxResults, searchConfig.getMaxResultsCap());
-		}
-
-		String format = getStringParamter(req, PARAM_FORMAT, searchConfig.getFormat());
-		float minRelevance = getFloatParamter(req, PARAM_MIN_RELEVANCE, searchConfig.getMinRelevanceScore());
-
-		if (format == null || format.equals("")) {
-			format = QueryConfig.CONFIG_FIELD_FORMAT_XML;
-		}
-
+		
 		logger.info("Search; " + req.getQueryString() + "; " + Time.currentWallTime() + ";");
 
-		JSONObject result = searcher.search(queryMap, maxResults, minRelevance, format, join);
+		JSONObject result = searcher.search(settings, queryMap, join);
 
-		if (format.equalsIgnoreCase(QueryConfig.CONFIG_FIELD_FORMAT_XML)) {
+		if (settings.getFormat().equalsIgnoreCase(QueryConfig.CONFIG_FIELD_FORMAT_XML)) {
 
 			resp.setCharacterEncoding("UTF-8");
 			resp.setContentType("application/xml");
@@ -214,7 +206,7 @@ public class LookupServlet extends HttpServlet {
 
 		Hashtable<QueryField, String> result = new Hashtable<QueryField, String>();
 
-		QueryField[] queryFields = searchConfig.getQueryFields();
+		QueryField[] queryFields = queryConfig.getQueryFields();
 
 		for (int i = 0; i < queryFields.length; i++) {
 
@@ -224,6 +216,12 @@ public class LookupServlet extends HttpServlet {
 
 			if (fieldRequired != null) {
 				queryField.setRequired(Boolean.parseBoolean(fieldRequired));
+			}
+
+			String fieldExact = req.getParameter(queryField.getFieldName() + QUERY_SUFFIX_EXACT);
+
+			if (fieldExact != null) {
+				queryField.setExact(Boolean.parseBoolean(fieldExact));
 			}
 
 			String fieldWeight = req.getParameter(queryField.getFieldName() + QUERY_SUFFIX_WEIGHT);
@@ -262,26 +260,6 @@ public class LookupServlet extends HttpServlet {
 		return result;
 	}
 
-	private float getFloatParamter(HttpServletRequest req, String[] keys, float defaultValue) {
-
-		for (String key : keys) {
-
-			String result = req.getParameter(key);
-
-			if (result == null) {
-				continue;
-			}
-
-			try {
-				return Float.parseFloat(result);
-			} catch (NumberFormatException e) {
-				continue;
-			}
-		}
-
-		return defaultValue;
-	}
-
 	private String getStringParamter(HttpServletRequest req, String[] keys, String defaultValue) {
 
 		for (String key : keys) {
@@ -296,24 +274,6 @@ public class LookupServlet extends HttpServlet {
 		return defaultValue;
 	}
 
-	private int getIntParamter(HttpServletRequest req, String[] keys, int defaultValue) {
-
-		for (String key : keys) {
-
-			String result = req.getParameter(key);
-
-			if (result == null) {
-				continue;
-			}
-
-			try {
-				return Integer.parseInt(result);
-			} catch (NumberFormatException e) {
-				continue;
-			}
-		}
-
-		return defaultValue;
-	}
+	
 
 }

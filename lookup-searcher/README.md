@@ -60,8 +60,8 @@ The [queryFields](#queryfields) variable holds the most important information wi
 ### indexPath
 The index path points to the directory holding the index structure (*absolute* or *relative to the configuration file*). This is usually the folder containing the result of the lookup indexer.
 
-### exactMathBoost
-Denotes a multiplier that is applied to any result score if the search term matches a document field value exactly. Can be overriden via HTTP query parameter (e.g. `...&exactMathBoost=100`).
+### exactMatchBoost
+Denotes a multiplier that is applied to any result score if the search term matches a document field value exactly. Can be overriden via HTTP query parameter (e.g. `...&exactMatchBoost=100`).
 
 ### prefixMatchBoost
 Denotes a multiplier this is applied to any result score if the search term is a prefix of a document field value. Can be overriden via HTTP query parameter (e.g. `...&prefixMatchBoost=100`).
