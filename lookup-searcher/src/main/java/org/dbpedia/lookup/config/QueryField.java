@@ -10,11 +10,12 @@ public class QueryField {
 	
 	private boolean highlight;
 	
-	private boolean isRequired;
 	
 	private boolean queryByDefault;
 
 	private boolean isExact;
+
+	private boolean isRequired;
 
 	private boolean tokenize;
 	

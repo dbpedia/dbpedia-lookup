@@ -92,3 +92,30 @@ When the selected format is [XML](#xml) you can provide the path to an *XSL* tem
 
 ### minRelevanceScore
 The minimum score that a potential search result has to reach in order to be included in the result set. Can be overriden via HTTP query parameter (e.g. `...&minRelevanceScore=10`).
+
+### boostFormula 
+*[Optional]* An mathematical function that will be applied to result documents based on any numeric field indexed to that document.
+
+### queryFields
+
+#### fieldName
+
+#### aliases
+
+#### weight
+
+#### highlight
+Denotes whether the result should include special html tags highlighting the match between the query string and the field value. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Highlight` (e.g. `...&labelHighlight=true` when searching on the field `label`).
+
+#### tokenize
+If `true`, the query string will be tokenized and each token will be matched against the field value of this field. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Tokenize` (e.g. `...&labelTokenize=true` when searching on the field `label`).
+
+#### required
+If `true`, a match on this field is required. A document that has a match on any other field included in the search but does *not* have a match on this field, will be dropped from the result set even if it would have been included otherwise. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Required` (e.g. `...&labelRequired=true` when searching on the field `label`).
+
+#### exact
+If `true`, a match on this field only counts if the field value matches the query string exactly. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Exact` (e.g. `...&labelExact=true` when searching on the field `label`).
+
+#### allowPartialMatch
+
+#### queryByDefault
