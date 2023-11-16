@@ -13,6 +13,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StoredField;
 import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;
 import org.apache.lucene.expressions.js.JavascriptCompiler;
@@ -31,6 +32,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.TotalHitCountCollector;
 import org.apache.lucene.search.highlight.Fragmenter;
 import org.apache.lucene.search.highlight.Highlighter;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
@@ -63,6 +65,8 @@ public class LuceneLookupSearcher {
 	public static final String FIELD_DOCUMENT_ID = "id";
 
 	public static final String FIELD_LABEL = "label";
+
+	public static final String FIELD_COUNT = "count";
 
 	public static final String FIELD_DESCRIPTION = "description";
 
@@ -318,16 +322,33 @@ public class LuceneLookupSearcher {
 	/**
 	 * Runs a query and returns the results as a list of documents
 	 * @param query
-	 * @param maxHits
+	 * @param maxResults
 	 * @return
 	 * @throws IOException
 	 * @throws InvalidTokenOffsetsException
 	 */
-	public ArrayList<ScoredDocument> runQuery(Query query, int maxHits) throws IOException {
+	public ArrayList<ScoredDocument> runQuery(Query query, int maxResults) throws IOException {
 
-		TopDocs docs = searcher.search(query, maxHits);
-		ScoreDoc[] hits = docs.scoreDocs;
 		ArrayList<ScoredDocument> resultList = new ArrayList<ScoredDocument>();
+
+		if(maxResults == 0) {
+			TotalHitCountCollector collector = new TotalHitCountCollector();
+			searcher.search(query, collector);
+
+			ScoredDocument scoredDocument = new ScoredDocument();
+
+			Document document = new Document();
+			document.add(new StoredField(FIELD_COUNT, "" + collector.getTotalHits()));
+			
+			scoredDocument.setDocument(document);
+			scoredDocument.setScore(1);
+			
+			resultList.add(scoredDocument);
+			return resultList;
+		}
+
+		TopDocs docs = searcher.search(query, maxResults);
+		ScoreDoc[] hits = docs.scoreDocs;
 
 		for(int i = 0; i < hits.length; i++) {
 
