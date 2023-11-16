@@ -164,7 +164,7 @@ Join can specify any indexed field. The search will then be executed normally bu
 ### exactMatchBoost
 Float value. See [exactMatchBoost](#exactmatchboost)
 
-## prefixMatchBoost
+### prefixMatchBoost
 Float value. See [prefixMatchBoost](#prefixmatchboost)
 
 ### fuzzyMatchBoost
