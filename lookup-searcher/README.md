@@ -39,7 +39,7 @@ fuzzyEditDistance: 2
 fuzzyPrefixLength: 2
 maxResults: 100
 format: JSON
-minRelevanceScore: 0.1
+minScore: 0.1
 queryFields:
   - fieldName: birthPlace
     weight: 5
@@ -92,8 +92,8 @@ The format of the results. Defaults to [JSON](#json) and can be one of the follo
 ### formatTemplate 
 When the selected format is [XML](#xml) you can provide the path to an *XSL* template to transform the result into any desired XML output.
 
-### minRelevanceScore
-The minimum score that a potential search result has to reach in order to be included in the result set. Can be overriden via HTTP query parameter (e.g. `...&minRelevanceScore=10`).
+### minScore
+The minimum score that a potential search result has to reach in order to be included in the result set. Can be overriden via HTTP query parameter (e.g. `...&minScore=10`).
 
 ### boostFormula 
 *[Optional]* An mathematical function that will be applied to result documents based on any numeric field indexed to that document.

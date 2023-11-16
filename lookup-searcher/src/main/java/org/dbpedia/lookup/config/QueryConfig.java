@@ -49,7 +49,7 @@ public class QueryConfig {
 
 	private int maxResultsCap;
 	
-	private float minRelevanceScore;
+	private float minScore;
 	
 	private String boostFormula;
 	
@@ -129,12 +129,12 @@ public class QueryConfig {
 		this.boostFormula = boostFormula;
 	}
 
-	public float getMinRelevanceScore() {
-		return minRelevanceScore;
+	public float getMinScore() {
+		return minScore;
 	}
 
-	public void setMinRelevanceScore(float minRelevanceScore) {
-		this.minRelevanceScore = minRelevanceScore;
+	public void setMinScore(float minScore) {
+		this.minScore = minScore;
 	}
 
 	public String getFormat() {

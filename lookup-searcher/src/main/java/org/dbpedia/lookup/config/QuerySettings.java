@@ -22,7 +22,7 @@ public class QuerySettings {
 
 	public static final String FORMAT = "format";
 
-	public static final String MIN_RELEVANCE_SCORE = "minRelevanceScore";
+	public static final String MIN_SCORE = "minScore";
 
 	public static final String FUZZY_MATCH_BOOST = "fuzzyMatchBoost";
 
@@ -40,7 +40,7 @@ public class QuerySettings {
 
 	private String format;
 
-	private float minRelevanceScore;
+	private float minScore;
 
 	private float fuzzyMatchBoost;
 
@@ -54,7 +54,7 @@ public class QuerySettings {
 		maxResults = config.getMaxResults();
 		maxResultsCap = config.getMaxResultsCap();
 		format = config.getFormat();
-		minRelevanceScore = config.getMinRelevanceScore();
+		minScore = config.getMinScore();
 		fuzzyEditDistance = config.getFuzzyEditDistance();
 		fuzzyMatchBoost = config.getFuzzyMatchBoost();
 		fuzzyPrefixLength = config.getFuzzyPrefixLength();
@@ -77,8 +77,8 @@ public class QuerySettings {
 		return fuzzyMatchBoost;
 	}
 
-	public float getMinRelevanceScore() {
-		return minRelevanceScore;
+	public float getMinScore() {
+		return minScore;
 	}
 
 	public float getExactMatchBoost() {
@@ -108,7 +108,7 @@ public class QuerySettings {
 		}
 
 		format = RequestUtils.getStringParameter(req, FORMAT, format);
-		minRelevanceScore = RequestUtils.getFloatParameter(req, MIN_RELEVANCE_SCORE, minRelevanceScore);
+		minScore = RequestUtils.getFloatParameter(req, MIN_SCORE, minScore);
 		fuzzyMatchBoost = RequestUtils.getFloatParameter(req, FUZZY_MATCH_BOOST, fuzzyMatchBoost);
 		fuzzyEditDistance = RequestUtils.getIntParameter(req, FUZZY_EDIT_DISTANCE, fuzzyEditDistance);
 		fuzzyPrefixLength = RequestUtils.getIntParameter(req, FUZZY_PREFIX_LENGTH, fuzzyPrefixLength);

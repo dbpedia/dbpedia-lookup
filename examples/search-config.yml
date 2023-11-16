@@ -7,7 +7,7 @@ fuzzyEditDistance: 2
 fuzzyPrefixLength: 2
 maxResults: 100
 format: JSON
-minRelevanceScore: 0.1
+minScore: 0.1
 queryFields:
   - fieldName: birthPlace
     weight: 10

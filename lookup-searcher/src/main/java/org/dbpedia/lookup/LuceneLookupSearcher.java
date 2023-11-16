@@ -221,7 +221,7 @@ public class LuceneLookupSearcher {
 
 			for (ScoredDocument document : documents) {
 
-				if (document.getScore() < settings.getMinRelevanceScore()) {
+				if (document.getScore() < settings.getMinScore()) {
 					continue;
 				}
 
