@@ -82,12 +82,16 @@ The maximum number of results. Can be overriden via HTTP query parameter (e.g. `
 The format of the results. Defaults to [JSON](#json) and can be one of the following:
 
 #### JSON
+Returns the result as JSON which includes highlighting tags in matched strings.
 
 #### JSON_RAW
+Returns the result as JSON without any highlighting tags.
 
 #### JSON_FULL
+Returns the result as JSON with highlighted *and* non-highlighted strings.
 
 #### XML
+Returns the result as XML.
 
 ### formatTemplate 
 When the selected format is [XML](#xml) you can provide the path to an *XSL* template to transform the result into any desired XML output.
@@ -108,22 +112,22 @@ The name of the field. The field name can be used as a query parameter.
 A list of strings specifying alternative names for a field name
 
 #### weight
-A numerical weight that is applied to a match on the respective field. E.g. can be used to express, that a match on a `title` field is worth more than a match on an `abstract` field.
+A numerical weight that is applied to a match on the respective field. E.g. can be used to express, that a match on a `title` field is worth more than a match on an `abstract` field. Can be overriden via HTTP query parameter using the field name followed by the string `Weight` (e.g. `...&labelWeight=true` when searching on the field `label`).
 
 #### highlight
 Denotes whether the result should include special html tags highlighting the match between the query string and the field value. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Highlight` (e.g. `...&labelHighlight=true` when searching on the field `label`).
 
 #### tokenize
-If `true`, the query string will be tokenized and each token will be matched against the field value of this field. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Tokenize` (e.g. `...&labelTokenize=true` when searching on the field `label`).
+If `true`, the query string will be tokenized and each token will be matched against the field value of this field. Tokenization includes, for instance, splitting of input strings by whitespaces. If set to `false`, the input will be matched against the document fields as is. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Tokenize` (e.g. `...&labelTokenize=true` when searching on the field `label`).
 
 #### required
 If `true`, a match on this field is required. A document that has a match on any other field included in the search but does *not* have a match on this field, will be dropped from the result set even if it would have been included otherwise. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Required` (e.g. `...&labelRequired=true` when searching on the field `label`).
 
 #### exact
-If `true`, a match on this field only counts if the field value matches the query string exactly. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Exact` (e.g. `...&labelExact=true` when searching on the field `label`).
+If `true`, a match on this field only counts if the field value matches the query string exactly. In that case, fuzzy and prefix matching will not be applied. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Exact` (e.g. `...&labelExact=true` when searching on the field `label`).
 
 #### allowPartialMatch
-Before matching the query string is tokenized. If set to `false`, a field will only count as matched if all query tokens match the field. If `true`, the field will match if at least one query token matches the field. Can be overriden via HTTP query parameter using the field name followed by the string `AllowPartialMatch` (e.g. `...&labelAllowPartialMatch=true` when searching on the field `label`).
+Before matching against a field, the query string can be [tokenized](#tokenize). If [allowPartialMatch](#allowpartialmatch) is set to `false`, a field will only count as matched if all query tokens match the field. If `true`, the field will match if at least one query token matches the field. Can be overriden via HTTP query parameter using the field name followed by the string `AllowPartialMatch` (e.g. `...&labelAllowPartialMatch=true` when searching on the field `label`).
 
 #### queryByDefault
 If `true`, all queries sent with the [query](#query) parameter will be matched against this field.
