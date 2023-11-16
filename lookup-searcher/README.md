@@ -140,5 +140,44 @@ The most important parameter: the search query string. The query string will be 
 ### [fieldName]
 Any configured field name can be used as a query parameter. The string specified with this parameter will only be matched against the respective field.
 
+### [fieldName]Weight
+Float value. See [weight](#weight).
+
+### [fieldName]Exact
+Boolean value. See [exact](#exact).
+
+### [fieldName]Required
+Boolean value. See [required](#required).
+
+### [fieldName]AllowPartialMatch
+Boolean value. See [allowPartialMatch](#allowpartialmatch).
+
+### [fieldName]Tokenize
+Boolean value. See [tokenize](#tokenize).
+
+### [fieldName]Highlight
+Boolean value. See [highlight](#highlight).
+
 ### join
 Join can specify any indexed field. The search will then be executed normally but the initial result set will not be returned. Instead, Lucene will return all documents that have a value for the specified field equal to any document id in the initial result set (simplified Lucene join).
+
+### exactMatchBoost
+Float value. See [exactMatchBoost](#exactmatchboost)
+
+## prefixMatchBoost
+Float value. See [prefixMatchBoost](#prefixmatchboost)
+
+### fuzzyMatchBoost
+Float value. See [fuzzyMatchBoost](#fuzzymatchboost)
+
+### fuzzyEditDistance
+Int value. See [fuzzyEditDistance](#fuzzyeditdistance)
+
+### fuzzyPrefixLength
+Int value. See [fuzzyPrefixLength](#fuzzyprefixlength)
+
+### maxResults
+See [maxResults](#maxresults)
+
+### format
+See [format](#format)
