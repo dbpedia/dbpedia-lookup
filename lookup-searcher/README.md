@@ -4,6 +4,8 @@
 
 The lookup searcher is a Lucene query generator using its query builder framework. It is made accessible via a servlet that is hosted on a jetty HTTP server. The servlet provides a HTML homepage with a search window along with a single API command at `api/search`. 
 
+Additionally, the application establishes a file system watcher on the index structure and restarts the servlet whenever a change to the index is detected. This makes index changes queriable without touching stopping and restarting the application.
+
 The query parameters of the search can be used to fine tune a search request and doing so, extend or override any configuration specified in the configuration file, that is provided upon servlet initialization.
 
 ## Quickstart Example
