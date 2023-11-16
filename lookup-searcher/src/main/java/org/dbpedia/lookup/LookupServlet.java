@@ -50,10 +50,6 @@ public class LookupServlet extends HttpServlet {
 
 	public static final String QUERY_SUFFIX_EXACT = "Exact";
 
-	public static final String QUERY_EXACT_MATCH_BOOST = "exactMatchBoost";
-
-	public static final String QUERY_PREFIX_MATCH_BOOST = "prefixMatchBoost";
-
 	private LuceneLookupSearcher searcher;
 
 	private QueryConfig queryConfig;
@@ -64,7 +60,7 @@ public class LookupServlet extends HttpServlet {
 
 	private static final String[] PARAM_QUERY = { "QueryString", "query" };
 
-	private static final String[] PARAM_JOIN = { "join" };
+	private static final String PARAM_JOIN = "join";
 
 	private String initializationError;
 
@@ -143,8 +139,8 @@ public class LookupServlet extends HttpServlet {
 			throw new ServletException("The initialization of the servlet failed: " + initializationError);
 		}
 
-		String query = getStringParamter(req, PARAM_QUERY, null);
-		String join = getStringParamter(req, PARAM_JOIN, null);
+		String query = RequestUtils.getStringParameter(req, PARAM_QUERY, null);
+		String join = RequestUtils.getStringParameter(req, PARAM_JOIN, null);
 
 		QuerySettings settings = new QuerySettings(queryConfig);
 		settings.parse(req);
@@ -152,7 +148,6 @@ public class LookupServlet extends HttpServlet {
 		Hashtable<QueryField, String> queryMap = createQueryMap(req, query);
 		
 		logger.info("Search; " + req.getQueryString() + "; " + Time.currentWallTime() + ";");
-
 		JSONObject result = searcher.search(settings, queryMap, join);
 
 		if (settings.getFormat().equalsIgnoreCase(QueryConfig.CONFIG_FIELD_FORMAT_XML)) {
@@ -260,20 +255,7 @@ public class LookupServlet extends HttpServlet {
 		return result;
 	}
 
-	private String getStringParamter(HttpServletRequest req, String[] keys, String defaultValue) {
-
-		for (String key : keys) {
-
-			String result = req.getParameter(key);
-
-			if (result != null) {
-				return result;
-			}
-		}
-
-		return defaultValue;
-	}
-
+	
 	
 
 }

@@ -1,5 +1,7 @@
 package org.dbpedia.lookup.config;
 
+import org.dbpedia.lookup.RequestUtils;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -74,7 +76,7 @@ public class QuerySettings {
 	public float getFuzzyMatchBoost() {
 		return fuzzyMatchBoost;
 	}
-	
+
 	public float getMinRelevanceScore() {
 		return minRelevanceScore;
 	}
@@ -97,60 +99,20 @@ public class QuerySettings {
 
 	public void parse(HttpServletRequest req) {
 
-		exactMatchBoost = parseFloatParameter(req, EXACT_MATCH_BOOST, exactMatchBoost);
-		prefixMatchBoost = parseFloatParameter(req, PREFIX_MATCH_BOOST, prefixMatchBoost);
-		maxResults = parseIntParameter(req, MAX_RESULTS, maxResults);
+		exactMatchBoost = RequestUtils.getFloatParameter(req, EXACT_MATCH_BOOST, exactMatchBoost);
+		prefixMatchBoost = RequestUtils.getFloatParameter(req, PREFIX_MATCH_BOOST, prefixMatchBoost);
+		maxResults = RequestUtils.getIntParameter(req, MAX_RESULTS, maxResults);
 
 		if (maxResultsCap > 0) {
 			maxResults = Math.min(maxResults, maxResultsCap);
 		}
 
-		format = parseStringParameter(req, FORMAT, format);
-		minRelevanceScore = parseFloatParameter(req, MIN_RELEVANCE_SCORE, minRelevanceScore);
-		fuzzyMatchBoost = parseFloatParameter(req, FUZZY_MATCH_BOOST, fuzzyMatchBoost);
-		fuzzyEditDistance = parseIntParameter(req, FUZZY_EDIT_DISTANCE, fuzzyEditDistance);
-		fuzzyPrefixLength = parseIntParameter(req, FUZZY_PREFIX_LENGTH, fuzzyPrefixLength);
+		format = RequestUtils.getStringParameter(req, FORMAT, format);
+		minRelevanceScore = RequestUtils.getFloatParameter(req, MIN_RELEVANCE_SCORE, minRelevanceScore);
+		fuzzyMatchBoost = RequestUtils.getFloatParameter(req, FUZZY_MATCH_BOOST, fuzzyMatchBoost);
+		fuzzyEditDistance = RequestUtils.getIntParameter(req, FUZZY_EDIT_DISTANCE, fuzzyEditDistance);
+		fuzzyPrefixLength = RequestUtils.getIntParameter(req, FUZZY_PREFIX_LENGTH, fuzzyPrefixLength);
 	}
 
-	private float parseFloatParameter(HttpServletRequest req, String key, float defaultValue) {
-
-		String result = req.getParameter(key);
-
-		if (result == null) {
-			return defaultValue;
-		}
-
-		try {
-			return Float.parseFloat(result);
-		} catch (NumberFormatException e) {
-			return defaultValue;
-		}
-	}
-
-	private int parseIntParameter(HttpServletRequest req, String key, int defaultValue) {
-
-		String result = req.getParameter(key);
-
-		if (result == null) {
-			return defaultValue;
-		}
-
-		try {
-			return Integer.parseInt(result);
-		} catch (NumberFormatException e) {
-			return defaultValue;
-		}
-	}
-
-	private String parseStringParameter(HttpServletRequest req, String key, String defaultValue) {
-
-		String result = req.getParameter(key);
-
-		if (result != null) {
-			return result;
-		}
-
-		return defaultValue;
-	}
-
+	
 }

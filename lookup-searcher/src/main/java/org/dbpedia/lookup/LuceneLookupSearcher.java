@@ -23,7 +23,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
-import org.apache.lucene.search.DocValuesFieldExistsQuery;
 import org.apache.lucene.search.DoubleValuesSource;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -58,13 +57,17 @@ import org.json.JSONObject;;
  */
 public class LuceneLookupSearcher {
 
-	public static final String FIELD_DOCUMENTS = "docs";
+	private static final String FIELD_DOCUMENTS = "docs";
 
-	public static final String FIELD_RESULT = "result";
+	private static final String FIELD_RESULT = "result";
 
-	public static final String FIELD_DOCUMENT_ID = "id";
+	private static final String FIELD_DOCUMENT_ID = "id";
 
-	public static final String FIELD_COUNT = "count";
+	private static final String FIELD_COUNT = "count";
+
+	private static final String FIELD_VALUE = "value";
+
+	private static final String FIELD_HIGHLIGHT = "highlight";
 
 	private IndexSearcher searcher;
 
@@ -260,7 +263,7 @@ public class LuceneLookupSearcher {
 	 * @return
 	 * @throws IOException
 	 */
-	public Query createQueryFromToken(String field, boolean isExact, String token, QuerySettings settings)
+	private Query createQueryFromToken(String field, boolean isExact, String token, QuerySettings settings)
 			throws IOException {
 
 		if (isExact) {
@@ -313,7 +316,7 @@ public class LuceneLookupSearcher {
 	 * @throws IOException
 	 * @throws InvalidTokenOffsetsException
 	 */
-	public ArrayList<ScoredDocument> runQuery(Query query, int maxResults) throws IOException {
+	private ArrayList<ScoredDocument> runQuery(Query query, int maxResults) throws IOException {
 
 		ArrayList<ScoredDocument> resultList = new ArrayList<ScoredDocument>();
 
@@ -373,7 +376,7 @@ public class LuceneLookupSearcher {
 			String name = f.name();
 
 			JSONObject jsonValue = new JSONObject();
-			jsonValue.put("value", value);
+			jsonValue.put(FIELD_VALUE, value);
 
 			// Highlight the document field, if the field is one of the search fields
 			for (QueryField field : fields) {
@@ -387,7 +390,7 @@ public class LuceneLookupSearcher {
 					}
 
 					if (fieldFormat.equalsIgnoreCase(QueryConfig.CONFIG_FIELD_FORMAT_JSON_FULL)) {
-						jsonValue.put("highlight", highlightValue != null ? highlightValue : value);
+						jsonValue.put(FIELD_HIGHLIGHT, highlightValue != null ? highlightValue : value);
 					}
 
 					break;
@@ -424,80 +427,6 @@ public class LuceneLookupSearcher {
 		} catch (InvalidTokenOffsetsException e) {
 			System.out.println("hightlighting went wrong");
 			return value;
-		}
-	}
-
-	public IndexSearcher getIndexSearcher() {
-		return searcher;
-	}
-
-	public String[] findResourcesWithField(String field, boolean isStored) {
-
-		try {
-			Query exists = null;
-
-			if (isStored) {
-				exists = new PrefixQuery(new Term(field, ""));
-
-			} else {
-				exists = new DocValuesFieldExistsQuery(field);
-			}
-
-			TopDocs docs = searcher.search(exists, Integer.MAX_VALUE);
-			ScoreDoc[] hits = docs.scoreDocs;
-
-			String[] resourceIdentifiers = new String[hits.length];
-
-			for (int i = 0; i < hits.length; i++) {
-
-				int docId = hits[i].doc;
-
-				Document doc = searcher.doc(docId);
-
-				resourceIdentifiers[i] = doc.get("resource");
-			}
-
-			return resourceIdentifiers;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	public String[] findLinkedLiterals(String resource, String[] path) {
-
-		try {
-			Query head = new TermQuery(new Term("resource", resource));
-			String literalField = path[path.length - 1];
-
-			for (int i = 0; i < path.length - 1; i++) {
-				head = JoinUtil.createJoinQuery(path[i], true, "resource", head, searcher, ScoreMode.None);
-			}
-
-			TopDocs pathDocs = searcher.search(head, Integer.MAX_VALUE);
-			ScoreDoc[] hits = pathDocs.scoreDocs;
-
-			ArrayList<String> literals = new ArrayList<String>();
-
-			for (int i = 0; i < hits.length; i++) {
-
-				int docId = hits[i].doc;
-				Document doc = searcher.doc(docId);
-
-				String[] values = doc.getValues(literalField);
-
-				if (values != null) {
-
-					for (String value : values) {
-						literals.add(value);
-					}
-				}
-			}
-
-			return literals.toArray(new String[0]);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
 		}
 	}
 
