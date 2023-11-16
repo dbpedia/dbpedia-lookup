@@ -1,5 +1,5 @@
 version: "1.0"
-indexPath: ../index
+indexPath: ./index
 exactMatchBoost: 10
 prefixMatchBoost: 5
 fuzzyMatchBoost: 2

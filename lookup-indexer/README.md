@@ -101,7 +101,7 @@ A user searching for the string "Berl" over the field *label* will then be able 
 ## Configuration
 
 ### indexPath
-The path of the target folder for the index structure. This can be either an empty folder or a folder containing an already existing index structure.
+The path of the target folder for the index structure (*abolute* or *relative to the configuration file*). This can be either an empty folder or a folder containing an already existing index structure.
 
 ### dataPath
 *[Optional]* This variable is only required when indexing the contents of RDF files. Points to the folder containing the files to index.
@@ -151,8 +151,12 @@ The type of the index field. Influences how the value selected by the [query](#q
 ##### text
 The field will be indexed and tokenized, which is useful for indexing any text with multiple words. Search queries can then return matches for each word.
 
+##### uri
+The field will be indexed but *not* tokenized or changed in any way. Useful for uris or other identifiers that should only match in its entirety. Uses the [UriAnalzyer](./src/main/java/org/dbpedia/lookup/indexer/UriAnalyzer.java).
+
 ##### string
-The field will be indexed but *not* tokenized. Useful for identifiers that should only match in its entirety. The field value will be indexed in its lowercase form.
+The field will be indexed but *not* tokenized. The field value will be indexed in its *lowercase* form. [StringPhraseAnalyzer](./src/main/java/org/dbpedia/lookup/indexer/StringPhraseAnalyzer.java).
+
 
 ##### stored
 Creates a field that is stored but not indexed. No changes to the string are applied.
@@ -162,3 +166,4 @@ Uses the [NGramAnalyzer](./src/main/java/org/dbpedia/lookup/indexer/NGramAnalyze
 
 ##### numeric
 Saves the file as a numeric field. Numeric field can be used in arithmetic operations during query time.
+

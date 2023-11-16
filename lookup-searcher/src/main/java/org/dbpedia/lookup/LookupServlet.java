@@ -82,13 +82,12 @@ public class LookupServlet extends HttpServlet {
 
 			File configFile = new File(configPath);
 			String configDirectory = configFile.getParent();
-
 			String indexPath = configDirectory + "/" + config.getIndexPath();
+
 			// Create the searcher that handles the search requests on the index structure
 			searcher = new LuceneLookupSearcher(indexPath, config);
 
 		} catch (Exception e) {
-
 			// this is logged to catalina.out
 			e.printStackTrace();
 			logger.error(e.toString());

@@ -212,7 +212,7 @@ public class LuceneLookupSearcher {
 					
 					if(join != null) {
 						boostQuery = JoinUtil.createJoinQuery(FIELD_DOCUMENT_ID, false, join,
-							boostQuery, this.searcher, ScoreMode.None);
+							boostQuery, this.searcher, ScoreMode.Max);
 					}
 
 					tokenQueryBuilder = tokenQueryBuilder.add(boostQuery, allowPartialMatch ? Occur.SHOULD : Occur.MUST);

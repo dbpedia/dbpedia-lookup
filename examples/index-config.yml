@@ -18,7 +18,7 @@ indexFields:
       } LIMIT 10000
   - fieldName: birthPlace
     documentVariable: person
-    type: stored
+    type: uri
     query: >
       SELECT ?person ?birthPlace WHERE {
         {

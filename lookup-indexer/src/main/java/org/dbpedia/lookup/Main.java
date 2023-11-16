@@ -72,7 +72,7 @@ public class Main {
 		logger = LoggerFactory.getLogger(Main.class);
 
 		IndexMode mode = IndexMode.BUILD_MEM;
-		
+
 		// Parse command line interface parameters
 		Options options = new Options();
 		options.addOption(CLI_OPT_CONFIG_PATH, CLI_OPT_CONFIG_PATH_LONG, true, CLI_OPT_CONFIG_PATH_HELP);
@@ -122,13 +122,14 @@ public class Main {
 			try {
 				mode = Enum.valueOf(IndexMode.class, indexConfig.getIndexMode());
 			} catch (Exception e) {
-				logger.info("Unkown specified index mode, exiting. Use either BUILD_MEM, BUILD_DISK, INDEX_DISK or INDEX_SPARQL_ENDPOINT.");
+				logger.info(
+						"Unkown specified index mode, exiting. Use either BUILD_MEM, BUILD_DISK, INDEX_DISK or INDEX_SPARQL_ENDPOINT.");
 				return;
 			}
 
 			logger.info("INDEX MODE:\t\t" + mode);
 			logger.info("CLEAN INDEX:\t\t" + indexConfig.isCleanIndex());
-			
+
 			// Update queries based on URIs specified in the CLI
 			updateQueriesForResources(resourceURI, indexConfig);
 
@@ -139,19 +140,23 @@ public class Main {
 			// Initialize ARQ
 			ARQ.init();
 
+			File configFile = new File(configPath);
+			String configDirectory = configFile.getParent();
+			String indexPath = configDirectory + "/" + indexConfig.getIndexPath();
+
 			// Switch over the index mode to execute on of the following methods:
 			switch (mode) {
 				case BUILD_MEM:
-					buildMem(indexConfig);
+					buildMem(indexPath, indexConfig);
 					break;
 				case BUILD_DISK:
-					buildDisk(indexConfig);
+					buildDisk(indexPath, indexConfig);
 					break;
 				case INDEX_DISK:
-					indexDisk(indexConfig);
+					indexDisk(indexPath, indexConfig);
 					break;
 				case INDEX_SPARQL_ENDPOINT:
-					indexSparqlEndpoint(indexConfig);
+					indexSparqlEndpoint(indexPath, indexConfig);
 					break;
 			}
 
@@ -177,18 +182,24 @@ public class Main {
 	}
 
 	/**
-	 * If one or more resources are specified via the CLI, all queries will be updated to only
-	 * query for key-value pairs for those specific resources. This is achived by inserting a 
-	 * VALUES clause into each query which restricts the key to the set of specified URIs
+	 * If one or more resources are specified via the CLI, all queries will be
+	 * updated to only
+	 * query for key-value pairs for those specific resources. This is achived by
+	 * inserting a
+	 * VALUES clause into each query which restricts the key to the set of specified
+	 * URIs
+	 * 
 	 * @param resourceURI
 	 * @param indexConfig
 	 */
 	private static void updateQueriesForResources(String resourceURI, final IndexConfig indexConfig) {
-		// Create the values string. Any occurance of the the string %VALUES% will be replaced
+		// Create the values string. Any occurance of the the string %VALUES% will be
+		// replaced
 		// with the values string before querying
 		String valuesURIString = "";
 
-		// The values string will be created from the whitespace separated URIs passed as the 
+		// The values string will be created from the whitespace separated URIs passed
+		// as the
 		// resourceURI argument (-r)
 		if (resourceURI != null) {
 
@@ -199,7 +210,7 @@ public class Main {
 			}
 		}
 
-		// 
+		//
 		for (IndexField field : indexConfig.getIndexFields()) {
 			String query = field.getQuery();
 			String resourceName = field.getDocumentVariable();
@@ -208,7 +219,6 @@ public class Main {
 
 			if (resourceURI != null) {
 				logger.info("RESOURCE\t\t" + resourceURI);
-
 
 				valuesClause = String.format(VALUES_CLAUSE_TEMPLATE, resourceName, valuesURIString);
 				indexConfig.setCleanIndex(false);
@@ -223,45 +233,54 @@ public class Main {
 
 	/**
 	 * Indexing based on an already existing SPARQL endpoint
+	 * 
 	 * @param xmlConfig
 	 */
-	private static void indexSparqlEndpoint(IndexConfig xmlConfig) {
+	private static void indexSparqlEndpoint(String indexPath, IndexConfig xmlConfig) {
+		
+		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(indexPath, xmlConfig, logger);
 
-		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig, logger);
+		try {
 
-		// Iterate over all index fields
-		for (IndexField indexFieldConfig : xmlConfig.getIndexFields()) {
+			// Iterate over all index fields
+			for (IndexField indexFieldConfig : xmlConfig.getIndexFields()) {
 
-			logger.info("=====================================================================");
-			logger.info("Indexing field '" + indexFieldConfig.getFieldName() + "'");
-			logger.info("=====================================================================");
+				logger.info("=====================================================================");
+				logger.info("Indexing field '" + indexFieldConfig.getFieldName() + "'");
+				logger.info("=====================================================================");
 
-			try (QueryExecution qexec = QueryExecutionFactory.sparqlService(xmlConfig.getSparqlEndpoint(),
-					indexFieldConfig.getQuery())) {
+				try (QueryExecution qexec = QueryExecutionFactory.sparqlService(xmlConfig.getSparqlEndpoint(),
+						indexFieldConfig.getQuery())) {
 
-				// Query endpoint and get results (key-value pairs)
-				ResultSet results = qexec.execSelect();
+					// Query endpoint and get results (key-value pairs)
+					ResultSet results = qexec.execSelect();
 
-				// Send to indexer
-				lookupIndexer.indexResult(results, indexFieldConfig);
-				lookupIndexer.commit();
+					// Send to indexer
+					lookupIndexer.indexResult(results, indexFieldConfig);
+					lookupIndexer.commit();
+				}
 			}
-		}
 
-		lookupIndexer.finish();
+			lookupIndexer.finish();
+		} catch (Exception e) {
+			lookupIndexer.cleanUp();
+			throw(e);
+		}
 	}
 
 	/**
 	 * Creates the index by building an Apache Jena dataset in memory.
 	 * Once the dataset is built, the indexable key-value pairs are fetched via
-	 * SPARQL queries and sent to the Lucene indexer. This method is only recommended for indexing smaller files
+	 * SPARQL queries and sent to the Lucene indexer. This method is only
+	 * recommended for indexing smaller files
 	 * as it uses a considerable amount of RAM
 	 * 
 	 * @param dataPath   The path of the data to load
-	 * @param cleanIndex Indicates whether to delete any existing Lucene index in the target folder before indexing
+	 * @param cleanIndex Indicates whether to delete any existing Lucene index in
+	 *                   the target folder before indexing
 	 * @param xmlConfig  The configuration file used for indexing
 	 */
-	private static void buildMem(IndexConfig xmlConfig) {
+	private static void buildMem(String indexPath, IndexConfig xmlConfig) {
 		Dataset dataset = DatasetFactory.create();
 
 		// Find the files to load in the specified data path
@@ -285,12 +304,13 @@ public class Main {
 		}
 
 		// Start the indexing
-		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig, logger);
+		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(indexPath, xmlConfig, logger);
 		indexData(dataset, lookupIndexer, xmlConfig);
 	}
 
 	/**
-	 * Creates the index by building a TDB2 data set on disk using a parallel bulk loader.
+	 * Creates the index by building a TDB2 data set on disk using a parallel bulk
+	 * loader.
 	 * Once the data set is build, the indexable key-value pairs are fetched via
 	 * SPARQL queries and sent to the Lucene indexer.
 	 * 
@@ -299,7 +319,7 @@ public class Main {
 	 * @param cleanIndex indicates whether to clean the Lucene index before indexing
 	 * @param xmlConfig  the configuration file used for indexing
 	 */
-	private static void buildDisk(IndexConfig xmlConfig) {
+	private static void buildDisk(String indexPath, IndexConfig xmlConfig) {
 
 		// Connect to TDB2 graph on disk
 		DatasetGraph datasetGraph = DatabaseMgr.connectDatasetGraph(xmlConfig.getTdbPath());
@@ -349,7 +369,7 @@ public class Main {
 		}
 
 		// Do the indexing
-		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(xmlConfig, logger);
+		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(indexPath, xmlConfig, logger);
 		indexData(DatasetFactory.wrap(datasetGraph), lookupIndexer, xmlConfig);
 	}
 
@@ -362,7 +382,7 @@ public class Main {
 	 * @param cleanIndex indicates whether to clean the Lucene index before indexing
 	 * @param xmlConfig  the configuration file used for indexing
 	 */
-	private static void indexDisk(IndexConfig indexConfig) {
+	private static void indexDisk(String indexPath, IndexConfig indexConfig) {
 
 		logger.info("Connecting to TDB2 data set graph...");
 
@@ -370,13 +390,15 @@ public class Main {
 		DatasetGraph datasetGraph = DatabaseMgr.connectDatasetGraph(indexConfig.getDataPath());
 
 		// Do the indexing
-		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(indexConfig, logger);
+		LuceneLookupIndexer lookupIndexer = new LuceneLookupIndexer(indexPath, indexConfig, logger);
 		indexData(DatasetFactory.wrap(datasetGraph), lookupIndexer, indexConfig);
 	}
 
 	/**
-	 * Used by all dataset based indexing methods. Runs the configured queries against the the loaded
+	 * Used by all dataset based indexing methods. Runs the configured queries
+	 * against the the loaded
 	 * Datasets and passes the resulting key-value results to the lookup indexer
+	 * 
 	 * @param dataset
 	 * @param lookupIndexer
 	 * @param indexConfig

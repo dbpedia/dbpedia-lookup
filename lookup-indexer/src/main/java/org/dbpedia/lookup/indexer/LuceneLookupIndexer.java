@@ -66,15 +66,15 @@ public class LuceneLookupIndexer {
 
 	private String lastValue = null;
 
-	public LuceneLookupIndexer(IndexConfig indexConfig, Logger logger) {
+	private File stagingDirectory = null;
+
+	public LuceneLookupIndexer(String targetPath, IndexConfig indexConfig, Logger logger) {
 
 		this.logger = logger;
-
 		this.indexConfig = indexConfig;
-		this.targetPath = indexConfig.getIndexPath();
+		this.targetPath = targetPath; 
 
-		// Create a document cache to keep documents in between commits to the lucene
-		// structure
+		// Create a document cache to keep documents in between commits to the lucene structure
 		documentCache = new ConcurrentHashMap<String, Document>();
 
 		// Create a new analyzer for the given index configuration
@@ -86,16 +86,17 @@ public class LuceneLookupIndexer {
 
 			if (indexConfig.isCleanIndex()) {
 				String stagingFolderName = "." + UUID.randomUUID().toString();
-				indexPath = Paths.get(targetPath).getParent().toString() +
+				this.indexPath = Paths.get(targetPath).getParent().toString() +
 					File.separator + stagingFolderName;
-				indexDirectory = FSDirectory.open(Paths.get(indexPath));
+				indexDirectory = FSDirectory.open(Paths.get(this.indexPath));
 
+				this.stagingDirectory = new File(this.indexPath);
 			} else {
-				indexPath = targetPath;
+				this.indexPath = targetPath;
 				indexDirectory = targetDirectory;
 			}
 
-			File file = new File(indexPath);
+			File file = new File(this.indexPath);
 			file.mkdirs();
 
 			documentCache = new ConcurrentHashMap<String, Document>();
@@ -105,8 +106,20 @@ public class LuceneLookupIndexer {
 		} catch (IndexNotFoundException e) {
 			return;
 		} catch (IOException e) {
+			cleanUp();
 			e.printStackTrace();
 			return;
+		}
+	}
+
+	public void cleanUp() {
+		if(this.stagingDirectory != null) {
+			for(File file : this.stagingDirectory.listFiles()) {
+				file.delete();	
+			}
+
+			this.stagingDirectory.delete();
+			this.stagingDirectory = null;
 		}
 	}
 
@@ -135,6 +148,10 @@ public class LuceneLookupIndexer {
 
 			if(fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_NGRAM)) {
 				analyzerPerField.put(field.getFieldName(), new NGramAnalyzer());
+			}
+
+			if(fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_URI)) {
+				analyzerPerField.put(field.getFieldName(), new UriAnalyzer());
 			}
 		}
 
@@ -201,6 +218,9 @@ public class LuceneLookupIndexer {
 					doc.add(new StoredField(field, valueString));
 					doc.add(new SortedDocValuesField(field, new BytesRef(valueString)));
 					break;
+				case Constants.CONFIG_FIELD_TYPE_URI:
+					doc.add(new StringField(field, valueString, Field.Store.YES));
+					break;
 				default:
 					doc.add(new TextField(field, valueString, Field.Store.YES));
 					break;
@@ -255,6 +275,7 @@ public class LuceneLookupIndexer {
 			document.removeFields(Constants.FIELD_DOCUMENT_ID);
 			document.add(new StringField(Constants.FIELD_DOCUMENT_ID, documentId, Field.Store.YES));
 			document.add(new SortedDocValuesField(Constants.FIELD_DOCUMENT_ID, new BytesRef(documentId)));
+			
 			// Fetched document fields are all reset to default stored/text fields
 			// Special fields such as the numeric fields have to be reset to their
 			// respective type
@@ -315,21 +336,6 @@ public class LuceneLookupIndexer {
 
 	}
 
-	public boolean clearIndex() {
-
-		try {
-			indexWriter.deleteAll();
-			commit();
-			return true;
-		} catch (IndexNotFoundException e) {
-			return true;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return false;
-	}
-
 	public void finish() {
 		try {
 			indexWriter.close();
@@ -341,8 +347,8 @@ public class LuceneLookupIndexer {
 			// If we are in a staging area, copy the results over
 			if (indexConfig.isCleanIndex()) {
 				File targetFile = new File(targetPath);
-
 				FileUtils.cleanDirectory(targetFile);
+
 				File indexFile = new File(indexPath);
 
 				for(File file : indexFile.listFiles()) {
@@ -350,7 +356,6 @@ public class LuceneLookupIndexer {
 				}
 
 				indexFile.delete();
-
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
