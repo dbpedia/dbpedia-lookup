@@ -50,6 +50,10 @@ public class LookupServlet extends HttpServlet {
 
 	public static final String QUERY_SUFFIX_EXACT = "Exact";
 
+	public static final String QUERY_SUFFIX_TOKENIZE = "Tokenize";
+
+	public static final String QUERY_SUFFIX_HIGHLIGHT = "Highlight";
+
 	public static final String QUERY_SUFFIX_ALLOW_PARTIAL_MATCH = "AllowPartialMatch";
 
 	private LuceneLookupSearcher searcher;
@@ -148,7 +152,7 @@ public class LookupServlet extends HttpServlet {
 		settings.parse(req);
 
 		Hashtable<QueryField, String> queryMap = createQueryMap(req, query);
-		
+
 		logger.info("Search; " + req.getQueryString() + "; " + Time.currentWallTime() + ";");
 		JSONObject result = searcher.search(settings, queryMap, join);
 
@@ -221,7 +225,20 @@ public class LookupServlet extends HttpServlet {
 				queryField.setExact(Boolean.parseBoolean(fieldExact));
 			}
 
-			String fieldAllowPartialMatch = req.getParameter(queryField.getFieldName() + QUERY_SUFFIX_ALLOW_PARTIAL_MATCH);
+			String fieldTokenize = req.getParameter(queryField.getFieldName() + QUERY_SUFFIX_TOKENIZE);
+
+			if (fieldTokenize != null) {
+				queryField.setTokenize(Boolean.parseBoolean(fieldTokenize));
+			}
+
+			String fieldHighlight = req.getParameter(queryField.getFieldName() + QUERY_SUFFIX_HIGHLIGHT);
+
+			if (fieldHighlight != null) {
+				queryField.setHighlight(Boolean.parseBoolean(fieldHighlight));
+			}
+
+			String fieldAllowPartialMatch = req
+					.getParameter(queryField.getFieldName() + QUERY_SUFFIX_ALLOW_PARTIAL_MATCH);
 
 			if (fieldAllowPartialMatch != null) {
 				queryField.setAllowPartialMatch(Boolean.parseBoolean(fieldAllowPartialMatch));
@@ -262,8 +279,5 @@ public class LookupServlet extends HttpServlet {
 
 		return result;
 	}
-
-	
-	
 
 }
