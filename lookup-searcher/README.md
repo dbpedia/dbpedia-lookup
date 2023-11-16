@@ -123,6 +123,7 @@ If `true`, a match on this field is required. A document that has a match on any
 If `true`, a match on this field only counts if the field value matches the query string exactly. Defaults to `false`. Can be overriden via HTTP query parameter using the field name followed by the string `Exact` (e.g. `...&labelExact=true` when searching on the field `label`).
 
 #### allowPartialMatch
+Before matching the query string is tokenized. If set to `false`, a field will only count as matched if all query tokens match the field. If `true`, the field will match if at least one query token matches the field. Can be overriden via HTTP query parameter using the field name followed by the string `AllowPartialMatch` (e.g. `...&labelAllowPartialMatch=true` when searching on the field `label`).
 
 #### queryByDefault
 If `true`, all queries sent with the [query](#query) parameter will be matched against this field.
@@ -130,7 +131,7 @@ If `true`, all queries sent with the [query](#query) parameter will be matched a
 ## Query Parameters
 
 ### query
-The most important parameter: the search query string
+The most important parameter: the search query string. The query string will be matched against all fields configured as [queryByDefault](#querybydefault).
 
 ### [fieldName]
 Any configured field name can be used as a query parameter. The string specified with this parameter will only be matched against the respective field.

@@ -50,6 +50,8 @@ public class LookupServlet extends HttpServlet {
 
 	public static final String QUERY_SUFFIX_EXACT = "Exact";
 
+	public static final String QUERY_SUFFIX_ALLOW_PARTIAL_MATCH = "AllowPartialMatch";
+
 	private LuceneLookupSearcher searcher;
 
 	private QueryConfig queryConfig;
@@ -217,6 +219,12 @@ public class LookupServlet extends HttpServlet {
 
 			if (fieldExact != null) {
 				queryField.setExact(Boolean.parseBoolean(fieldExact));
+			}
+
+			String fieldAllowPartialMatch = req.getParameter(queryField.getFieldName() + QUERY_SUFFIX_ALLOW_PARTIAL_MATCH);
+
+			if (fieldAllowPartialMatch != null) {
+				queryField.setAllowPartialMatch(Boolean.parseBoolean(fieldAllowPartialMatch));
 			}
 
 			String fieldWeight = req.getParameter(queryField.getFieldName() + QUERY_SUFFIX_WEIGHT);
