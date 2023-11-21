@@ -273,8 +273,9 @@ public class LuceneLookupSearcher {
 		Term term = new Term(field, token);
 
 		Query prefixQuery = new BoostQuery(new PrefixQuery(term), settings.getPrefixMatchBoost());
-		Query fuzzyQuery = new BoostQuery(new FuzzyQuery(term, settings.getFuzzyEditDistance(), settings.getFuzzyPrefixLength()),
-			settings.getFuzzyMatchBoost());
+		Query fuzzyQuery = new BoostQuery(
+				new FuzzyQuery(term, settings.getFuzzyEditDistance(), settings.getFuzzyPrefixLength()),
+				settings.getFuzzyMatchBoost());
 		Query termQuery = new BoostQuery(new TermQuery(term), settings.getExactMatchBoost());
 
 		BooleanQuery.Builder builder = new BooleanQuery.Builder();
@@ -342,6 +343,7 @@ public class LuceneLookupSearcher {
 		for (int i = 0; i < hits.length; i++) {
 
 			int docId = hits[i].doc;
+
 			Document document = searcher.doc(docId);
 
 			ScoredDocument scoredDocument = new ScoredDocument();

@@ -9,9 +9,15 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.DispatcherType;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,9 +28,11 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.EnumSet;
 
 /**
- * Run to start a jetty server that hosts the lookup servlet and makes it accessible
+ * Run to start a jetty server that hosts the lookup servlet and makes it
+ * accessible
  * via HTTP
  */
 public class JettyLookupServer {
@@ -34,7 +42,7 @@ public class JettyLookupServer {
     private static final String CLI_OPT_CONFIG_LONG = "config";
 
     private static final String CLI_OPT_CONFIG_HELP = "The path of the application configuration file.";
-  
+
     private static final String CLI_OPT_HOME = "h";
 
     private static final String CLI_OPT_HOME_LONG = "home";
@@ -52,8 +60,10 @@ public class JettyLookupServer {
     private static org.slf4j.Logger log;
 
     /**
-     * Run to start a jetty server that hosts the lookup servlet and makes it accessible
+     * Run to start a jetty server that hosts the lookup servlet and makes it
+     * accessible
      * via HTTP
+     * 
      * @param args
      * @throws Exception
      */
@@ -83,7 +93,7 @@ public class JettyLookupServer {
                 resourceBasePath = cmd.getOptionValue(CLI_OPT_HOME);
             }
 
-            if(cmd.hasOption(CLI_OPT_PORT)) {
+            if (cmd.hasOption(CLI_OPT_PORT)) {
                 String portString = cmd.getOptionValue(CLI_OPT_PORT);
                 port = Integer.parseInt(portString);
             }
@@ -92,39 +102,50 @@ public class JettyLookupServer {
             e1.printStackTrace();
         }
 
-        if(configPath == null) {
+        if (configPath == null) {
             log.error("No config specified");
             return;
         }
 
         try {
             QueryConfig.Load(configPath);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Unable to load the config file:");
             log.error(e.getMessage());
         }
 
-        if(resourceBasePath == null) {
+        if (resourceBasePath == null) {
             File configFile = new File(configPath);
             resourceBasePath = configFile.getParent().toString();
         }
 
         server = new Server(port);
 
+        // Take care of CORS requests
+        ServletContextHandler context = new ServletContextHandler();
+
+        context.setContextPath("/");
+        context.setWelcomeFiles(new String[] { "index.html" });
+        context.setResourceBase(resourceBasePath);
+
+        FilterHolder cors = context.addFilter(CrossOriginFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD");
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin");
+
         // Create a servlet handler and holder for the API and pass the config
-        ServletHandler searchHandler = new ServletHandler();
-        ServletHolder hodler = searchHandler.addServletWithMapping(LookupServlet.class, "/api/search/*");
+        ServletHolder hodler = context.addServlet(LookupServlet.class, "/api/search/*");
         hodler.setInitParameter(LookupServlet.CONFIG_PATH, configPath);
 
-        // Index page setup
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setDirectoriesListed(false);
-        resourceHandler.setWelcomeFiles(new String[] { "index.html" });
-        resourceHandler.setResourceBase(resourceBasePath);
-    
+        ServletHolder def = new ServletHolder("default", DefaultServlet.class);
+        def.setInitParameter("resourceBase", resourceBasePath);
+        def.setInitParameter("dirAllowed", "false");
+        context.addServlet(def, "/");
+
         // Add handlers for the index html and the API servlet
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { resourceHandler, searchHandler });
+        handlers.setHandlers(new Handler[] { context });
         server.setHandler(handlers);
         server.start();
 
@@ -135,8 +156,11 @@ public class JettyLookupServer {
     }
 
     /**
-     * Creates a watch service that watches for changes in the index directory. Any change in the index
-     * structure will trigger a restart of the jetty server and thus a refresh of the index searcher.
+     * Creates a watch service that watches for changes in the index directory. Any
+     * change in the index
+     * structure will trigger a restart of the jetty server and thus a refresh of
+     * the index searcher.
+     * 
      * @param configPath
      * @throws Exception
      * @throws IOException
@@ -144,16 +168,16 @@ public class JettyLookupServer {
      */
     private static void watchIndex(String configPath) throws Exception, IOException, InterruptedException {
         QueryConfig queryConfig = QueryConfig.Load(configPath);
-        
+
         WatchService watcher = FileSystems.getDefault().newWatchService();
 
         File indexDirectoryFile = new File(queryConfig.getIndexPath());
         indexDirectoryFile.mkdirs();
 
         Path indexDirectory = Paths.get(queryConfig.getIndexPath());
-        indexDirectory.register(watcher, 
-            StandardWatchEventKinds.ENTRY_CREATE,
-            StandardWatchEventKinds.ENTRY_MODIFY);
+        indexDirectory.register(watcher,
+                StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_MODIFY);
 
         while (true) {
 
@@ -182,6 +206,6 @@ public class JettyLookupServer {
 
             key.reset();
         }
-         
+
     }
 }
