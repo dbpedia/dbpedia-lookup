@@ -200,7 +200,13 @@ public class LuceneLookupIndexer {
 
 		try {
 			Document doc = findDocument(documentId);
+			
+			IndexableField docField = doc.getField(field);
 
+			if(docField != null && valueString != null && valueString.equals(docField.stringValue())) {
+				return;
+			}
+			
 			switch (fieldType) {
 				case Constants.CONFIG_FIELD_TYPE_NUMERIC:
 					long value = Long.parseLong(valueString);
