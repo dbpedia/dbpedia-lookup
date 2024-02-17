@@ -201,10 +201,14 @@ public class LuceneLookupIndexer {
 		try {
 			Document doc = findDocument(documentId);
 			
-			IndexableField docField = doc.getField(field);
+			if(valueString != null) {
+				IndexableField[] existingFields = doc.getFields(field);
 
-			if(docField != null && valueString != null && valueString.equals(docField.stringValue())) {
-				return;
+				for(IndexableField existingField : existingFields) {
+					if(existingField != null && valueString.equals(existingField.stringValue())) {
+						return;
+					}
+				}
 			}
 			
 			switch (fieldType) {
