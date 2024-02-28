@@ -10,7 +10,6 @@ public class QueryField {
 	
 	private boolean highlight;
 	
-	
 	private boolean queryByDefault;
 
 	private boolean isExact;
@@ -20,6 +19,8 @@ public class QueryField {
 	private boolean tokenize;
 	
 	private boolean allowPartialMatch;
+
+	private boolean isNumeric;
 
 	public boolean tokenize() { return tokenize; }
 
@@ -45,6 +46,8 @@ public class QueryField {
 		this.weight = weight;
 	}
 
+	
+
 	public String getFieldName() {
 		return fieldName;
 	}
@@ -69,6 +72,13 @@ public class QueryField {
 		this.isRequired = isRequired;
 	}
 
+	public void setNumeric(boolean isNumeric) {
+		this.isNumeric = isNumeric;
+	}
+
+	public boolean isNumeric() {
+		return isNumeric;
+	}
 	/**
 	 * Creates a copy of this query field config object
 	 * @return
@@ -83,6 +93,7 @@ public class QueryField {
 		copy.isExact = this.isExact;
 		copy.tokenize = this.tokenize;
 		copy.aliases = this.aliases;
+		copy.isNumeric = this.isNumeric;
 		copy.allowPartialMatch = this.allowPartialMatch;
 		return copy;
 	}

@@ -13,6 +13,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;
@@ -175,6 +176,26 @@ public class LuceneLookupSearcher {
 				boolean allowPartialMatch = fields[i].isAllowPartialMatch();
 				boolean isExact = fields[i].isExact();
 
+				if(fields[i].isNumeric()) {
+
+					if(query.contains(",")) {
+						String[] conditionStrings = query.split(",");
+
+						if(conditionStrings.length != 2) {
+							continue;
+						}
+
+						int lowerBound = parseIntWithFallback(conditionStrings[0], Integer.MIN_VALUE);
+						int upperBound = parseIntWithFallback(conditionStrings[1], Integer.MAX_VALUE);
+
+						Query rangeQuery = LongPoint.newRangeQuery(field, lowerBound, upperBound);
+						
+						queryBuilder.add(rangeQuery, Occur.MUST);
+					}
+
+					continue;					
+				}
+
 				List<String> tokens;
 
 				if (fields[i].tokenize()) {
@@ -196,11 +217,6 @@ public class LuceneLookupSearcher {
 					Query boostQuery = new BoostQuery(createQueryFromToken(field, fields[i].isExact(),
 							token, settings), fields[i].getWeight());
 
-					if (join != null) {
-						boostQuery = JoinUtil.createJoinQuery(FIELD_DOCUMENT_ID, false, join,
-								boostQuery, this.searcher, ScoreMode.Max);
-					}
-
 					tokenQueryBuilder = tokenQueryBuilder.add(boostQuery,
 							allowPartialMatch ? Occur.SHOULD : Occur.MUST);
 				}
@@ -216,30 +232,12 @@ public class LuceneLookupSearcher {
 				query = FunctionScoreQuery.boostByValue(query, boostValueSource);
 			}
 
-			ArrayList<ScoredDocument> documents = runQuery(query, settings.getMaxResult());
-			JSONArray documentArray = new JSONArray();
-
-			for (ScoredDocument document : documents) {
-
-				if (document.getScore() < settings.getMinScore()) {
-					continue;
-				}
-
-				ArrayList<Object> scoreList = new ArrayList<Object>();
-				scoreList.add("" + document.getScore());
-
-				HashMap<String, ArrayList<Object>> documentMap = parseResult(query, fields,
-						document.getDocument(), settings.getFormat());
-
-				documentMap.put("score", scoreList);
-				documentArray.put(documentMap);
+			if (join != null) {
+				query = JoinUtil.createJoinQuery(FIELD_DOCUMENT_ID, false, join,
+					query, this.searcher, ScoreMode.Total);
 			}
 
-			JSONObject returnResults = new JSONObject();
-			returnResults.put(settings.getFormat().equalsIgnoreCase(QueryConfig.CONFIG_FIELD_FORMAT_XML) ? FIELD_RESULT
-					: FIELD_DOCUMENTS, documentArray);
-
-			return returnResults;
+			return getReturnResults(fields, settings, query);
 
 		} catch (IOException e) {
 
@@ -248,6 +246,33 @@ public class LuceneLookupSearcher {
 		}
 
 		return null;
+	}
+
+	private JSONObject getReturnResults(QueryField[] fields, QuerySettings settings, Query query) throws IOException {
+		ArrayList<ScoredDocument> documents = runQuery(query, settings.getMaxResult());
+		JSONArray documentArray = new JSONArray();
+
+		for (ScoredDocument document : documents) {
+
+			if (document.getScore() < settings.getMinScore()) {
+				continue;
+			}
+
+			ArrayList<Object> scoreList = new ArrayList<Object>();
+			scoreList.add("" + document.getScore());
+
+			HashMap<String, ArrayList<Object>> documentMap = parseResult(query, fields,
+					document.getDocument(), settings.getFormat());
+
+			documentMap.put("score", scoreList);
+			documentArray.put(documentMap);
+		}
+
+		JSONObject returnResults = new JSONObject();
+		returnResults.put(settings.getFormat().equalsIgnoreCase(QueryConfig.CONFIG_FIELD_FORMAT_XML) ? FIELD_RESULT
+				: FIELD_DOCUMENTS, documentArray);
+
+		return returnResults;
 	}
 
 	/**
@@ -438,6 +463,17 @@ public class LuceneLookupSearcher {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private int parseIntWithFallback(String val, int defaultValue) {
+		int result;
+		try {
+			result = Integer.parseInt(val);
+		} catch(NumberFormatException ex) {
+			result = defaultValue;
+		}
+
+		return result;
 	}
 
 	public static class ScoredDocument {
