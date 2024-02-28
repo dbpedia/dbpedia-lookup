@@ -15,6 +15,7 @@ import org.apache.lucene.analysis.standard.StandardTokenizer;
  */
 public class NGramAnalyzer extends Analyzer {
 
+	@SuppressWarnings("resource")
 	@Override
 	protected TokenStreamComponents createComponents(String fieldName) {
 

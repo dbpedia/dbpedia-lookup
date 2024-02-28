@@ -1,8 +1,11 @@
 package org.dbpedia.lookup.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -17,13 +20,14 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class IndexConfig {
 
+
 	private String version;
 
 	private List<IndexField> indexFields;
 
 	private String indexPath;
 
-	private String indexMode;
+	private IndexMode indexMode;
 
 	private String tdbPath;
 
@@ -93,11 +97,11 @@ public class IndexConfig {
 		this.commitInterval = commitInterval;
 	}
 
-	public String getIndexMode() {
+	public IndexMode getIndexMode() {
 		return indexMode;
 	}
 
-	public void setIndexMode(String indexMode) {
+	public void setIndexMode(IndexMode indexMode) {
 		this.indexMode = indexMode;
 	}
 
@@ -122,9 +126,12 @@ public class IndexConfig {
 	 * 
 	 * @param path The path of the file
 	 * @return True if the configuration has been loaded correctly, false otherwise
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 * @throws Exception
 	 */
-	public static IndexConfig Load(String path) throws Exception {
+	public static IndexConfig Load(String path) throws JsonParseException, JsonMappingException, IOException {
 
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -132,5 +139,4 @@ public class IndexConfig {
 
 		return config;
 	}
-
 }

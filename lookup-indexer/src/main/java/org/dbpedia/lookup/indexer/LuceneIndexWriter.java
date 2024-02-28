@@ -38,7 +38,7 @@ import org.dbpedia.lookup.config.IndexConfig;
 import org.dbpedia.lookup.config.IndexField;
 import org.slf4j.Logger;
 
-public class LuceneLookupIndexer {
+public class LuceneIndexWriter {
 
 	private static String lockFileName = "/write.lock";
 
@@ -68,11 +68,11 @@ public class LuceneLookupIndexer {
 
 	private File stagingDirectory = null;
 
-	public LuceneLookupIndexer(String targetPath, IndexConfig indexConfig, Logger logger) {
+	public LuceneIndexWriter(IndexConfig indexConfig, Logger logger) {
 
 		this.logger = logger;
 		this.indexConfig = indexConfig;
-		this.targetPath = targetPath; 
+		this.targetPath = indexConfig.getIndexPath(); 
 
 		// Create a document cache to keep documents in between commits to the lucene structure
 		documentCache = new ConcurrentHashMap<String, Document>();
@@ -200,6 +200,16 @@ public class LuceneLookupIndexer {
 
 		try {
 			Document doc = findDocument(documentId);
+			
+			if(valueString != null) {
+				IndexableField[] existingFields = doc.getFields(field);
+
+				for(IndexableField existingField : existingFields) {
+					if(existingField != null && valueString.equals(existingField.stringValue())) {
+						return;
+					}
+				}
+			}
 
 			switch (fieldType) {
 				case Constants.CONFIG_FIELD_TYPE_NUMERIC:
