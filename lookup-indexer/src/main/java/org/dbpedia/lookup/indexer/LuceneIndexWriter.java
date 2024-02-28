@@ -210,7 +210,7 @@ public class LuceneIndexWriter {
 					}
 				}
 			}
-
+			
 			switch (fieldType) {
 				case Constants.CONFIG_FIELD_TYPE_NUMERIC:
 					long value = Long.parseLong(valueString);
