@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Hashtable;
 
 import jakarta.servlet.ServletException;
@@ -259,9 +261,14 @@ public class LookupServlet extends HttpServlet {
 			}
 
 			String fieldQuery = req.getParameter(queryField.getFieldName());
-
+			
 			if (fieldQuery != null) {
-				result.put(queryField, fieldQuery);
+				try {
+					fieldQuery = URLDecoder.decode(fieldQuery, "UTF-8");	
+					result.put(queryField, fieldQuery);
+				} catch (UnsupportedEncodingException e) {
+					result.put(queryField, fieldQuery);
+				}
 				continue;
 			}
 

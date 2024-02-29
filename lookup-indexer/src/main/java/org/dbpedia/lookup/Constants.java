@@ -27,6 +27,8 @@ public class Constants {
 	public static final String CONFIG_FIELD_TYPE_STORED = "stored";
 
 	public static final String CONFIG_FIELD_TYPE_URI = "uri";
+	
+	public static final String CONFIG_FIELD_TYPE_JOIN = "join";
 
 	public static final String CONFIG_FIELD_TYPE_STORED_SORTED = "stored_sorted";
 

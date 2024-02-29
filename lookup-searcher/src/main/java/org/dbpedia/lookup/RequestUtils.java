@@ -1,5 +1,8 @@
 package org.dbpedia.lookup;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 public class RequestUtils {
@@ -11,7 +14,13 @@ public class RequestUtils {
 			String result = req.getParameter(key);
 
 			if (result != null) {
-				return result;
+
+				try {
+					return URLDecoder.decode(result, "UTF-8");	
+					
+				} catch (UnsupportedEncodingException e) {
+					return result;
+				}
 			}
 		}
 

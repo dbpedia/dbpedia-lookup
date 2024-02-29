@@ -19,16 +19,20 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.document.SortedDocValuesField;
+import org.apache.lucene.document.SortedSetDocValuesField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.StoredFields;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
@@ -216,6 +220,7 @@ public class LuceneIndexWriter {
 					long value = Long.parseLong(valueString);
 					doc.removeFields(field);
 					doc.add(new StoredField(field, value));
+					doc.add(new LongPoint(field, value));
 					doc.add(new NumericDocValuesField(field, value));
 					break;
 				case Constants.CONFIG_FIELD_TYPE_STORED:
@@ -226,7 +231,7 @@ public class LuceneIndexWriter {
 					break;
 				case Constants.CONFIG_FIELD_TYPE_STORED_SORTED:
 					doc.add(new StoredField(field, valueString));
-					doc.add(new SortedDocValuesField(field, new BytesRef(valueString)));
+					doc.add(new SortedSetDocValuesField(field, new BytesRef(valueString)));
 					break;
 				case Constants.CONFIG_FIELD_TYPE_URI:
 					doc.add(new StringField(field, valueString, Field.Store.YES));
@@ -235,7 +240,7 @@ public class LuceneIndexWriter {
 					doc.add(new TextField(field, valueString, Field.Store.YES));
 					break;
 			}
-
+			
 			indexWriter.updateDocument(new Term(Constants.FIELD_DOCUMENT_ID, documentId), doc);
 
 		} catch (IOException e) {
@@ -257,13 +262,14 @@ public class LuceneIndexWriter {
 		Document document = getDocumentFromIndex(documentId);
 
 		if (document == null) {
-			// Second try: create new document, add to cache
+			// Second try: create new document
 			document = new Document();
 
 			document.add(new StringField(Constants.FIELD_DOCUMENT_ID, documentId, Field.Store.YES));
 			document.add(new SortedDocValuesField(Constants.FIELD_DOCUMENT_ID, new BytesRef(documentId)));
 		}
 
+		// we touched the document, we might touch it again soon -> add to cache
 		documentCache.put(documentId, document);
 		return document;
 	}
@@ -278,10 +284,13 @@ public class LuceneIndexWriter {
 		TermQuery documentIdTermQuery = new TermQuery(documentIdTerm);
 
 		TopDocs docs = searcher.search(documentIdTermQuery, 1);
+ 		StoredFields storedFields = searcher.storedFields();
+ 		
+		if (docs.scoreDocs.length > 0) {
 
-		if (docs.totalHits > 0) {
-
-			Document document = searcher.doc(docs.scoreDocs[0].doc);
+			ScoreDoc scoreDoc = docs.scoreDocs[0]; 
+			Document document = storedFields.document(scoreDoc.doc);
+				
 			document.removeFields(Constants.FIELD_DOCUMENT_ID);
 			document.add(new StringField(Constants.FIELD_DOCUMENT_ID, documentId, Field.Store.YES));
 			document.add(new SortedDocValuesField(Constants.FIELD_DOCUMENT_ID, new BytesRef(documentId)));
@@ -295,6 +304,20 @@ public class LuceneIndexWriter {
 
 				if (fieldType == null) {
 					continue;
+				}
+
+				if(fieldType.contentEquals(Constants.CONFIG_FIELD_TYPE_STORED_SORTED)) {
+					IndexableField[] storedSortedFields = document.getFields(field.getFieldName());
+					String fieldName = field.getFieldName();
+					document.removeFields(fieldName);
+
+					for(IndexableField storedField : storedSortedFields) {
+						String value = storedField.stringValue();
+						// Re-add the field
+						document.add(new StoredField(fieldName, value));
+						document.add(new SortedSetDocValuesField(fieldName, new BytesRef(value)));
+					}
+				
 				}
 
 				// Remove all numeric index fields and re-add them to the document as
@@ -317,6 +340,7 @@ public class LuceneIndexWriter {
 						// Re-add the field
 						document.add(new NumericDocValuesField(field.getFieldName(), value));
 						document.add(new StoredField(field.getFieldName(), value));
+						document.add(new LongPoint(field.getFieldName(), value));
 					}
 				}
 			}

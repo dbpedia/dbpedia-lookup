@@ -3,6 +3,7 @@ package org.dbpedia.lookup;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.apache.lucene.expressions.SimpleBindings;
 import org.apache.lucene.expressions.js.JavascriptCompiler;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.StoredFields;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.search.BooleanQuery;
@@ -32,7 +34,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.TotalHitCountCollector;
 import org.apache.lucene.search.highlight.Fragmenter;
 import org.apache.lucene.search.highlight.Highlighter;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
@@ -231,13 +232,21 @@ public class LuceneLookupSearcher {
 			if (boostValueSource != null) {
 				query = FunctionScoreQuery.boostByValue(query, boostValueSource);
 			}
+			
+			TopDocs joinDocs = null;
 
 			if (join != null) {
+
+				joinDocs = this.searcher.search(query, 10000);
+				
+
 				query = JoinUtil.createJoinQuery(FIELD_DOCUMENT_ID, false, join,
-					query, this.searcher, ScoreMode.Total);
+					query, this.searcher, ScoreMode.None);
+
+				System.out.println(query);
 			}
 
-			return getReturnResults(fields, settings, query);
+			return getReturnResults(fields, settings, query, join, joinDocs);
 
 		} catch (IOException e) {
 
@@ -248,9 +257,51 @@ public class LuceneLookupSearcher {
 		return null;
 	}
 
-	private JSONObject getReturnResults(QueryField[] fields, QuerySettings settings, Query query) throws IOException {
+	private JSONObject getReturnResults(QueryField[] fields, QuerySettings settings, Query query, String join, TopDocs joinDocs) throws IOException {
 		ArrayList<ScoredDocument> documents = runQuery(query, settings.getMaxResult());
 		JSONArray documentArray = new JSONArray();
+		HashMap<String, Float> joinScoreMap = null;
+
+		if(join != null) {
+			joinScoreMap = new HashMap<>();
+			StoredFields storedFields = searcher.storedFields();
+			ScoreDoc[] hits = joinDocs.scoreDocs;
+	
+			for (int i = 0; i < hits.length; i++) {
+	
+				int docId = hits[i].doc;
+				Document document = storedFields.document(docId);
+				IndexableField field = document.getField(FIELD_DOCUMENT_ID);
+	
+				if(field == null) {
+					continue;
+				}
+	
+				joinScoreMap.put(field.stringValue(), hits[i].score);
+			}
+		}
+
+
+		for (ScoredDocument document : documents) {
+
+			if(join != null) {
+
+				float score = 0;
+				IndexableField[] joinFields = document.getDocument().getFields(join);
+
+				for(IndexableField joinField : joinFields) {
+					String value = joinField.stringValue();
+
+					if(joinScoreMap.containsKey(value)) {
+						score += joinScoreMap.get(value);
+					}
+				}
+
+				document.setScore(score);
+			}
+		}
+
+		documents.sort(new ScoreDocumentComparator());
 
 		for (ScoredDocument document : documents) {
 
@@ -347,13 +398,13 @@ public class LuceneLookupSearcher {
 		ArrayList<ScoredDocument> resultList = new ArrayList<ScoredDocument>();
 
 		if (maxResults == 0) {
-			TotalHitCountCollector collector = new TotalHitCountCollector();
-			searcher.search(query, collector);
+			
+			int hitCount = searcher.count(query);
 
 			ScoredDocument scoredDocument = new ScoredDocument();
 
 			Document document = new Document();
-			document.add(new StoredField(FIELD_COUNT, "" + collector.getTotalHits()));
+			document.add(new StoredField(FIELD_COUNT, "" + hitCount));
 
 			scoredDocument.setDocument(document);
 			scoredDocument.setScore(1);
@@ -363,13 +414,15 @@ public class LuceneLookupSearcher {
 		}
 
 		TopDocs docs = searcher.search(query, maxResults);
+		StoredFields storedFields = searcher.storedFields();
 		ScoreDoc[] hits = docs.scoreDocs;
 
 		for (int i = 0; i < hits.length; i++) {
 
 			int docId = hits[i].doc;
+			System.out.println(searcher.explain(query, docId));
 
-			Document document = searcher.doc(docId);
+			Document document = storedFields.document(docId);
 
 			ScoredDocument scoredDocument = new ScoredDocument();
 			scoredDocument.setDocument(document);
@@ -495,6 +548,14 @@ public class LuceneLookupSearcher {
 
 		public void setScore(float score) {
 			this.score = score;
+		}
+	}
+
+	public class ScoreDocumentComparator implements Comparator<ScoredDocument> {
+		@Override
+		public int compare(ScoredDocument doc1, ScoredDocument doc2) {
+			// Compare scores in descending order
+			return Float.compare(doc2.getScore(), doc1.getScore());
 		}
 	}
 }
