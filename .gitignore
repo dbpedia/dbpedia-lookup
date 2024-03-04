@@ -51,7 +51,6 @@ dependency-reduced-pom.xml
 lookup-index/
 /bin/
 WebContent
-data
 lucene-index
 tb-graph
 index

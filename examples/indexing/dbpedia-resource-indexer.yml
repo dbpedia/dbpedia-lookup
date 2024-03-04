@@ -1,6 +1,5 @@
 version: "1.0"
-indexMode: INDEX_IN_MEMORY
-dataPath: C:\Users\janfo\Documents\Work\dbpedia-lookup\examples\data
+indexMode: INDEX_SPARQL_ENDPOINT
 sparqlEndpoint: https://dbpedia.org/sparql
 indexFields:
   - fieldName: label

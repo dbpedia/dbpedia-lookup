@@ -2,7 +2,7 @@
 
 ### Example Configuration
 
-The [index configuration](../examples/index-config.yml) looks as follows:
+A simple example [index configuration](../examples/indexing/dbpedia-resource-indexer.yml) looks as follows:
 ```yaml
 version: "1.0"
 indexMode: INDEX_SPARQL_ENDPOINT
