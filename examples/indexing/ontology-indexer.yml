@@ -1,6 +1,6 @@
 version: "1.0"
 indexMode: INDEX_IN_MEMORY
-dataPath: ./data
+dataPath: ./examples/indexing/data
 indexFields:
   - fieldName: label
     documentVariable: resource
