@@ -6,19 +6,6 @@ The DBpedia Lookup can be used to index and search RDF files or databases.
 
 The indexer and searcher uses the Lucene framework for the index structures and queries - and the Apache Jena framework for RDF and SPARQL parsing and loading, thus supporting a wide range of RDF formats.
 
-### Start A Lookup Instance
-
-You can run the *"Launch Lookup Server"* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
-
-Alternatively, you can use maven to build a `.jar` file by issuing
-```
-mvn package
-```
-and then running the resulting `lookup-1.0-jar-with-dependencies` file via
-```
-java -jar ./target/lookup-1.0-jar-with-dependencies -c ../examples/lookup-config.yml
-```
-
 ## How does it work?
 
 The general idea behind this indexer is leveraging the power of the SPARQL query language to select specific key-value pairs from a knowledge graph and add them to a inverse index. A user can then search over values and quickly retreive associated keys using fuzzy matching.
@@ -34,7 +21,18 @@ The [examples folder](../examples/) contains configuration files for a search in
 It contains a configuration file for the lookup server instance ([lookup-config.yml](../examples/lookup-config.yml)) and a configuration for the indexing request ([dbpedia-resource-indexer.yml](../examples/indexing/dbpedia-resource-indexer.yml))
 
 ### Step 1
-Run the server as described above to use the provided configuration in [lookup-config.yml](../examples/lookup-config.yml).
+Run a server instance using the provided configuration in [lookup-config.yml](../examples/lookup-config.yml).
+
+You can run the *"Launch Lookup Server"* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
+
+Alternatively, you can use maven to build a `.jar` file by issuing
+```
+mvn package
+```
+and then running the resulting `lookup-1.0-jar-with-dependencies` file via
+```
+java -jar ./target/lookup-1.0-jar-with-dependencies -c ../examples/lookup-config.yml
+```
 
 ### Step 2
 
