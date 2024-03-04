@@ -33,8 +33,12 @@ The [examples folder](../examples/) contains configuration files for a search in
 
 It contains a configuration file for the lookup server instance ([lookup-config.yml](../examples/lookup-config.yml)) and a configuration for the indexing request ([dbpedia-resource-indexer.yml](../examples/indexing/dbpedia-resource-indexer.yml))
 
+### Step 1
 Run the server as described above to use the provided configuration in [lookup-config.yml](../examples/lookup-config.yml).
-In order to run the indexer, issue the following HTTP request:
+
+### Step 2
+
+Run the indexing process. Issue the following HTTP request:
 
 ```
 curl --request POST \
@@ -43,6 +47,8 @@ curl --request POST \
   --form config=@index-config.yml \
   --form values=http://dbpedia.org/resource/Berlin,http://dbpedia.org/resource/Leipzig,http://dbpedia.org/resource/Hamburg
 ```
+
+### Step 3
 
 Subsequently, the following request should return a result with the DBpedia entry of the city Berlin.
 
