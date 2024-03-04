@@ -110,6 +110,13 @@ public class LookupSearcher {
 		if(directory != null) {
 			try {
 				directory.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if(reader != null) {
+			try {
 				reader.close();
 			} catch (IOException e) {
 				e.printStackTrace();

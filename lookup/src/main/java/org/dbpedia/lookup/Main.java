@@ -142,10 +142,8 @@ public class Main {
         File indexFile = new File(indexPath);
 
         if (!indexFile.isAbsolute()) {
-            File configFile = new File(configPath);
-            String configDirectory = configFile.getParent();
-            indexPath = configDirectory + "/" + lookupConfig.getIndexPath();
-            lookupConfig.setIndexPath(indexPath);
+
+            lookupConfig.setIndexPath(indexFile.getAbsolutePath());
         }
 
         File file = new File(indexPath);
