@@ -1,7 +1,7 @@
 version: "1.0"
 indexPath: ./index
 maxBufferedDocs: 1000000
-logInterval: 1
+logInterval: 100
 exactMatchBoost: 10
 prefixMatchBoost: 7
 fuzzyMatchBoost: 1

@@ -22,6 +22,7 @@ import org.apache.jena.tdb2.loader.DataLoader;
 import org.apache.jena.tdb2.loader.LoaderFactory;
 import org.apache.jena.tdb2.loader.base.MonitorOutput;
 import org.apache.lucene.index.IndexWriter;
+import org.dbpedia.lookup.DatabusUtils;
 import org.dbpedia.lookup.RDFFileFilter;
 import org.dbpedia.lookup.config.IndexConfig;
 import org.dbpedia.lookup.config.IndexField;
@@ -182,7 +183,7 @@ public class LookupIndexer {
 		Dataset dataset = DatasetFactory.create();
 
 		// Find the files to load in the specified data path
-		File[] filesToLoad = getFilesToLoad(config.getDataPath());
+		File[] filesToLoad = getFilesToLoad(config);
 
 		if (filesToLoad == null || filesToLoad.length == 0) {
 			logger.info("Nothing to load. Exiting.");
@@ -190,9 +191,9 @@ public class LookupIndexer {
 		}
 
 		logger.info("=====================================================================");
-		logger.info("Loading data at " + config.getDataPath() + " to in-memory dataset.");
+		logger.info("Loading Files to In-Memory TDB2 Database");
 		logger.info("=====================================================================");
-
+		
 		// Load to in-memory triple store
 		try (RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
 			for (File file : filesToLoad) {
@@ -229,7 +230,7 @@ public class LookupIndexer {
 		logger.info("Fetching files...");
 
 		// Fetch the files to load
-		File[] filesToLoad = getFilesToLoad(config.getDataPath());
+		File[] filesToLoad = getFilesToLoad(config);
 
 		if (filesToLoad == null || filesToLoad.length == 0) {
 			logger.info("Nothing to load. Exiting.");
@@ -329,24 +330,42 @@ public class LookupIndexer {
 		}
 	}
 
-	private static File[] getFilesToLoad(String dataPath) {
-		File dataFile = new File(dataPath);
+	private File[] getFilesToLoad(IndexConfig config) {
+
 		File[] filesToLoad = new File[0];
 
-		if (dataFile.isDirectory()) {
-			filesToLoad = new File(dataPath).listFiles(new RDFFileFilter());
-		} else {
-			boolean accept = false;
-			String fileName = dataFile.getName();
-			accept |= fileName.contains(".ttl");
-			accept |= fileName.contains(".turtle");
-			accept |= fileName.contains(".n3");
-			accept |= fileName.contains(".nt");
+		if(config.getCollectionUri() != null) {
+			logger.info("=====================================================================");
+			logger.info("Fetching Databus Collection Files");
+			logger.info("=====================================================================");
 
-			if (accept) {
-				filesToLoad = new File[] { dataFile };
+			filesToLoad = DatabusUtils.loadDatabusFiles(config.getCollectionUri(), logger);
+		}
+		else {
+
+			logger.info("=====================================================================");
+			logger.info("Fetching files from folder: " + config.getDataPath());
+			logger.info("=====================================================================");
+
+			String dataPath = config.getDataPath();
+			File dataFile = new File(dataPath);
+
+			if (dataFile.isDirectory()) {
+				filesToLoad = new File(dataPath).listFiles(new RDFFileFilter());
+			} else {
+				boolean accept = false;
+				String fileName = dataFile.getName();
+				accept |= fileName.contains(".ttl");
+				accept |= fileName.contains(".turtle");
+				accept |= fileName.contains(".n3");
+				accept |= fileName.contains(".nt");
+
+				if (accept) {
+					filesToLoad = new File[] { dataFile };
+				}
 			}
 		}
+
 		return filesToLoad;
 	}
 

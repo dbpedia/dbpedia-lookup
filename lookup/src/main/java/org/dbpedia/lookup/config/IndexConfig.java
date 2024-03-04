@@ -32,6 +32,10 @@ public class IndexConfig {
 
 	private String dataPath;
 
+	private String collectionUri;
+
+
+
 	private String sparqlEndpoint;
 
 	public String getTdbPath() {
@@ -48,6 +52,14 @@ public class IndexConfig {
 
 	public void setDataPath(String dataPath) {
 		this.dataPath = dataPath;
+	}
+	
+	public String getCollectionUri() {
+		return collectionUri;
+	}
+
+	public void setCollectionUri(String collectionUri) {
+		this.collectionUri = collectionUri;
 	}
 
 	public String getVersion() {

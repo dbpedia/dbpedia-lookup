@@ -1,0 +1,15 @@
+version: "1.0"
+indexMode: INDEX_IN_MEMORY
+collectionUri: https://databus.dbpedia.org/janfo/collections/moss-ontologies
+indexFields:
+  - fieldName: label
+    documentVariable: resource
+    query: >
+      SELECT ?resource ?label WHERE {
+        {
+          ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+          FILTER(lang(?label) = 'en')
+          #VALUES#
+        }
+      } 
+      LIMIT 10000
