@@ -30,6 +30,7 @@ A Lucene index can be understood as a collection of documents. Each document has
 ## Quickstart Example
 
 The [examples folder](../examples/) contains configuration files for a search index over a part of the DBpedia knowledge graph (using [https://dbpedia.org/sparql](https://dbpedia.org/sparql)). 
+
 It contains a configuration file for the lookup server instance ([lookup-config.yml](../examples/lookup-config.yml)) and a configuration for the indexing request ([dbpedia-resource-indexer.yml](../examples/indexing/dbpedia-resource-indexer.yml))
 
 Run the server as described above to use the provided configuration in [lookup-config.yml](../examples/lookup-config.yml).
