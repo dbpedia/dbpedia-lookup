@@ -148,6 +148,10 @@ public class LookupSearcherServlet extends HttpServlet {
 		logger.info("Search; " + req.getQueryString() + "; " + Time.currentWallTime() + ";");
 		JSONObject result = searcher.search(settings, queryMap, join);
 
+		if(result == null) {
+			throw new ServletException("The index has not been created yet.");
+		}
+
 		if (settings.getFormat().equalsIgnoreCase(LookupConfig.CONFIG_FIELD_FORMAT_XML)) {
 
 			resp.setCharacterEncoding("UTF-8");

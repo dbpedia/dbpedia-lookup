@@ -1,7 +1,4 @@
-FROM maven:3.8.2-jdk-11
-
-COPY . /lookup
-RUN export MAVEN_OPTS='-Xmx4096m -Xms1024m'
-WORKDIR /lookup
-RUN mvn clean package
-CMD [ "java","-jar","/lookup/target/lookup-searcher-1.0-jar-with-dependencies.jar", "-c", "/lookup/config.yml" ]
+FROM openjdk:latest
+EXPOSE 8082
+COPY ./target/lookup-1.0-jar-with-dependencies.jar /opt/app/
+CMD [ "java","-jar","/opt/app/lookup-1.0-jar-with-dependencies.jar", "-c", "/resources/config.yml" ]

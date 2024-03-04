@@ -1,0 +1,11 @@
+version: "3.0"
+services:
+  databus:
+    image: "dbpedia/lookup:dev"
+    build: ./lookup
+    ports:
+      - 8082:8082
+    environment:
+      CONFIG_PATH: /resources/config.yml
+    volumes:
+      - ./examples/:/resources/

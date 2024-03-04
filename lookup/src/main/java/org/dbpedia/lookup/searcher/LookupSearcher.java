@@ -193,6 +193,10 @@ public class LookupSearcher {
 	public JSONObject search(LookupField[] fields, String[] queries, QuerySettings settings,
 			String join) {
 
+		if(this.searcher == null) {
+			return null;
+		}
+
 		try {
 			if (fields.length != queries.length) {
 				return null;
