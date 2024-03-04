@@ -8,7 +8,7 @@ The indexer and searcher uses the Lucene framework for the index structures and 
 
 ### Running the Server:
 
-You can run the *Launch Lookup Server* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
+You can run the *"Launch Lookup Server"* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
 
 Alternatively, you can use maven to build a `.jar` file by issuing
 ```
