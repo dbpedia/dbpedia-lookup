@@ -6,7 +6,7 @@ The DBpedia Lookup can be used to index and search RDF files or databases.
 
 The indexer and searcher uses the Lucene framework for the index structures and queries - and the Apache Jena framework for RDF and SPARQL parsing and loading, thus supporting a wide range of RDF formats.
 
-### Running the Server:
+### Start A Lookup Instance
 
 You can run the *"Launch Lookup Server"* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
 
