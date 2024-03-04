@@ -1,28 +1,16 @@
 version: "1.0"
-indexPath: ./index
-indexMode: INDEX_SPARQL_ENDPOINT
+indexMode: INDEX_IN_MEMORY
+dataPath: C:\Users\janfo\Documents\Work\dbpedia-lookup\examples\data
 sparqlEndpoint: https://dbpedia.org/sparql
-cleanIndex: true
-maxBufferedDocs: 100000
-commitInterval: 1000
 indexFields:
   - fieldName: label
-    documentVariable: city
+    documentVariable: resource
     query: >
-      SELECT ?city ?label WHERE {
+      SELECT ?resource ?label WHERE {
         {
-          ?city a <http://dbpedia.org/ontology/City> .
-          ?city <http://www.w3.org/2000/01/rdf-schema#label> ?label .
-          FILTER (LANG(?label) = "en").
+          ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+          FILTER(lang(?label) = 'en')
+          #VALUES#
         }
-      } LIMIT 10000
-  - fieldName: birthPlace
-    documentVariable: person
-    type: uri
-    query: >
-      SELECT ?person ?birthPlace WHERE {
-        {
-          ?person a <http://dbpedia.org/ontology/Person> .
-          ?person <http://dbpedia.org/ontology/birthPlace> ?birthPlace .
-        }
-      } LIMIT 10000
+      } 
+      LIMIT 10000

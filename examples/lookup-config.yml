@@ -1,0 +1,31 @@
+version: "1.0"
+indexPath: ./index
+maxBufferedDocs: 1000000
+logInterval: 1
+exactMatchBoost: 10
+prefixMatchBoost: 7
+fuzzyMatchBoost: 1
+fuzzyEditDistance: 2
+fuzzyPrefixLength: 2
+maxResults: 10000
+format: JSON
+minScore: 0.1
+lookupFields:
+  - name: label
+    weight: 1
+    highlight: true
+    tokenize: true
+    allowPartialMatch: true
+    queryByDefault: true
+  - name: comment
+    weight: .2
+    highlight: true
+    tokenize: true
+    allowPartialMatch: true
+    queryByDefault: true
+  - name: id
+    weight: 10
+    exact: true
+    highlight: false
+    tokenize: false
+    queryByDefault: false
