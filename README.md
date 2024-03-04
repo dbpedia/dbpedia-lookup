@@ -6,19 +6,6 @@ The DBpedia Lookup can be used to index and search RDF files or databases.
 
 The indexer and searcher uses the Lucene framework for the index structures and queries - and the Apache Jena framework for RDF and SPARQL parsing and loading, thus supporting a wide range of RDF formats.
 
-### Running the Server:
-
-You can run the *Launch Lookup Server* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
-
-Alternatively, you can use maven to build a `.jar` file by issuing
-```
-mvn package
-```
-and then running the resulting `lookup-1.0-jar-with-dependencies` file via
-```
-java -jar ./target/lookup-1.0-jar-with-dependencies -c ../examples/lookup-config.yml
-```
-
 ## How does it work?
 
 The general idea behind this indexer is leveraging the power of the SPARQL query language to select specific key-value pairs from a knowledge graph and add them to a inverse index. A user can then search over values and quickly retreive associated keys using fuzzy matching.
@@ -30,10 +17,26 @@ A Lucene index can be understood as a collection of documents. Each document has
 ## Quickstart Example
 
 The [examples folder](../examples/) contains configuration files for a search index over a part of the DBpedia knowledge graph (using [https://dbpedia.org/sparql](https://dbpedia.org/sparql)). 
-It contains a configuration file for the lookup server instance ([lookup-config.yml](../examples/lookup-config.yml)) and a configuration for the indexing request ([index-config.yml](../examples/index-config.yml))
 
-Run the server as described above to use the provided configuration in [lookup-config.yml](../examples/lookup-config.yml).
-In order to run the indexer, issue the following HTTP request:
+It contains a configuration file for the lookup server instance ([lookup-config.yml](../examples/lookup-config.yml)) and a configuration for the indexing request ([dbpedia-resource-indexer.yml](../examples/indexing/dbpedia-resource-indexer.yml))
+
+### Step 1
+Run a server instance using the provided configuration in [lookup-config.yml](../examples/lookup-config.yml).
+
+You can run the *"Launch Lookup Server"* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
+
+Alternatively, you can use maven to build a `.jar` file by issuing
+```
+mvn package
+```
+and then running the resulting `lookup-1.0-jar-with-dependencies` file via
+```
+java -jar ./target/lookup-1.0-jar-with-dependencies -c ../examples/lookup-config.yml
+```
+
+### Step 2
+
+Run the indexing process. Issue the following HTTP request:
 
 ```
 curl --request POST \
@@ -42,6 +45,8 @@ curl --request POST \
   --form config=@index-config.yml \
   --form values=http://dbpedia.org/resource/Berlin,http://dbpedia.org/resource/Leipzig,http://dbpedia.org/resource/Hamburg
 ```
+
+### Step 3
 
 Subsequently, the following request should return a result with the DBpedia entry of the city Berlin.
 
