@@ -158,8 +158,6 @@ public class LuceneIndexWriter {
 
 			indexField(lastDocument, path, lastValue);
 
-			
-
 			if (k % config.getLogInterval() == 0) {
 				logger.info("Binding " + k + ": [" + lastDocument + "] -> \"" + lastValue + "\"");
 			}
@@ -176,7 +174,14 @@ public class LuceneIndexWriter {
 		if (fieldType != null) {
 			fieldType = fieldType.toLowerCase();
 		} else {
-			fieldType = Constants.CONFIG_FIELD_TYPE_TEXT;
+			
+			LookupField lookupField = config.getLookupField(field);
+
+			if(lookupField != null && lookupField.getType() != null) {
+				fieldType = lookupField.getType();
+			} else {
+				fieldType = Constants.CONFIG_FIELD_TYPE_TEXT;
+			}
 		}
 
 		try {

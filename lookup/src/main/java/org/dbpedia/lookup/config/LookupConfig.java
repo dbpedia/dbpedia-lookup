@@ -185,11 +185,12 @@ public class LookupConfig {
 		return version;
 	}
 
-
 	public void setVersion(String version) {
 		this.version = version;
 	}
 
+	
+	
 	/**
 	 * Loads the XML Configuration from file
 	 * @param path The path of the file
@@ -207,6 +208,20 @@ public class LookupConfig {
 
     public LookupConfig copy() {
         return null;
+    }
+
+    public LookupField getLookupField(String fieldName) {
+		for(LookupField field : lookupFields)  {
+			if(field.getName() == null) {
+				continue;
+			}
+
+			if(field.getName().equals(fieldName)) {
+				return field;
+			}
+		}
+
+		return null;
     }
 }
 

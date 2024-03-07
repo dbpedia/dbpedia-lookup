@@ -48,6 +48,8 @@ public class LookupSearcherServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 102831973239L;
 
+	private static final String VERSION_TAG = "v0.001";
+
 	public static final String PATH_REFRESH = "/refresh";
 
 	public static final String QUERY_SUFFIX_WEIGHT = "Weight";
@@ -81,11 +83,16 @@ public class LookupSearcherServlet extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 
+		System.out.println("Initializing Lookup Searcher " + VERSION_TAG);
 		searcher = (LookupSearcher)getServletContext().getAttribute("SEARCHER");
 
 		String configPath = getInitParameter(Main.CONFIG_PATH);
 		try {
 			queryConfig = LookupConfig.Load(configPath);
+
+			for(LookupField field : queryConfig.getLookupFields()) {
+				System.out.println(field.getName() + " -- " + field.getType() + " -- " + field.getWeight());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

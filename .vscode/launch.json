@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "org.dbpedia.lookup.Main",
             "projectName": "lookup",
-            "args": "-c ./examples/lookup-config.yml"
+            "args": "-c ./examples/config.yml"
         }
     ]
 }

@@ -214,9 +214,16 @@ public class LookupSearcher {
 				boolean allowPartialMatch = fields[i].isAllowPartialMatch();
 				boolean isExact = fields[i].isExact();
 
-				if(fields[i].getType() == Constants.CONFIG_FIELD_TYPE_NUMERIC) {
+				// System.out.println("Searching on " + field + "(" + fields[i].getType() + ")");
 
+				if(Constants.CONFIG_FIELD_TYPE_NUMERIC.equals(fields[i].getType())) {
+					
+					// System.out.println("Field is numeric.");
+					
 					if(query.contains(",")) {
+
+						// System.out.println("Might be a range query");
+					
 						String[] conditionStrings = query.split(",");
 
 						if(conditionStrings.length != 2) {
@@ -227,6 +234,7 @@ public class LookupSearcher {
 						int upperBound = parseIntWithFallback(conditionStrings[1], Integer.MAX_VALUE);
 
 						Query rangeQuery = LongPoint.newRangeQuery(field, lowerBound, upperBound);
+						// System.out.println("Adding range query with range: " + lowerBound + "," + upperBound);
 						
 						queryBuilder.add(rangeQuery, Occur.MUST);
 					}
@@ -277,7 +285,7 @@ public class LookupSearcher {
 				joinDocs = this.searcher.search(query, 10000);
 				
 
-				query = JoinUtil.createJoinQuery(FIELD_DOCUMENT_ID, false, join,
+				query = JoinUtil.createJoinQuery(FIELD_DOCUMENT_ID, true, join,
 					query, this.searcher, ScoreMode.None);
 
 				System.out.println(query);
@@ -314,10 +322,10 @@ public class LookupSearcher {
 					continue;
 				}
 	
+				// System.out.println("Adding to score map: " + field.stringValue() + ", score: " + hits[i].score);
 				joinScoreMap.put(field.stringValue(), hits[i].score);
 			}
 		}
-
 
 		for (ScoredDocument document : documents) {
 
@@ -334,6 +342,7 @@ public class LookupSearcher {
 					}
 				}
 
+				// System.out.println("Set joined score to " + score);
 				document.setScore(score);
 			}
 		}
@@ -543,6 +552,10 @@ public class LookupSearcher {
 			return value;
 		} catch (InvalidTokenOffsetsException e) {
 			System.out.println("hightlighting went wrong");
+			return value;
+		} catch (IllegalArgumentException e) {
+			System.err.println("hightlighting went wrong");
+			System.err.println(e);
 			return value;
 		}
 	}

@@ -95,6 +95,7 @@ public class LookupField {
 		copy.tokenize = this.tokenize;
 		copy.aliases = this.aliases;
 		copy.allowPartialMatch = this.allowPartialMatch;
+		copy.type = this.type;
 		return copy;
 	}
 
