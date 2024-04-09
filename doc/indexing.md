@@ -38,12 +38,14 @@ Before running the indexer, it is best to test each query in order to rule out a
 Since this current example is configured to run queries against a SPARQL endpoint (index mode set to INDEX_SPARQL_ENDPOINT with [https://dbpedia.org/sparql](https://dbpedia.org/sparql)) we can simply test our queries via HTTP requests. The first configured query could be tested, by running
 
 ```sparql
-SELECT ?city ?label WHERE 
-{
-  ?city a <http://dbpedia.org/ontology/City> .
-  ?city <http://www.w3.org/2000/01/rdf-schema#label> ?label .
-  FILTER (LANG(?label) = "en").
-} LIMIT 10000
+SELECT ?resource ?label WHERE {
+  {
+    ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+    FILTER(lang(?label) = 'en')
+    #VALUES#
+  }
+} 
+LIMIT 10000
 ```
 
 against the [DBpedia SPARQL endpoint](https://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=SELECT+%3Fcity+%3Flabel+WHERE+%7B%0D%0A++++++++%7B%0D%0A++++++++++%3Fcity+a+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2FCity%3E+.%0D%0A++++++++++%3Fcity+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%3E+%3Flabel+.%0D%0A++++++++++FILTER+%28LANG%28%3Flabel%29+%3D+%22en%22%29.%0D%0A++++++++%7D%0D%0A++++++%7D+LIMIT+10000&format=text%2Fhtml&timeout=30000&signal_void=on&signal_unconnected=on).
