@@ -29,6 +29,7 @@ The configuration fields describe the following (some less important fields are 
   * **fieldName:** The name of the field to be indexed. This is **also** the name of the variable in the query that will hold the field values
   * **documentVariable:** The name of the variable in the query that will hold the ID of the target lucene document.
   * **query:** The query describing the selection of document ID and field value from the target knowledge graph.
+  * the **#VALUES#** comment in the query: #VALUES# is a SPARQL comment and thus usually ignored. It acts as a placeholder for a SPARQL VALUES clause that gets inserted automatically when passing a list of URIs to the indexing process via the `values` parameter. This can be used to only retrieve bindings for a specific set of resources.
 
 ### Testing the Queries
 
