@@ -69,3 +69,14 @@ There are two types of configuration files for lookup, each with their own docum
 ## Discussion
 
 There is a discussion thread on the DBpedia forums for questions and suggestions concerning this app and service [here](https://forum.dbpedia.org/t/new-dbpedia-lookup-application/607).
+
+## Building the Docker Image
+
+In order to build the docker image run:
+```
+cd lookup
+mvn package
+docker build -t lookup .
+```
+
+Do this before running `docker compose up`.
