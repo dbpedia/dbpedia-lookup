@@ -1,6 +1,6 @@
 version: "3.0"
 services:
-  databus:
+  lookup:
     image: "dbpedia/lookup:dev"
     build: ./lookup
     ports:
