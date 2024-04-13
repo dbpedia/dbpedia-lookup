@@ -32,9 +32,9 @@ Alternatively, you can use maven to build a `.jar` file by issuing
 ```
 mvn package
 ```
-and then running the resulting `lookup-1.0-jar-with-dependencies` file via
+and then running the resulting `lookup-1.0-jar-with-dependencies.jar` file via
 ```
-java -jar ./target/lookup-1.0-jar-with-dependencies -c ../examples/lookup-config.yml
+java -jar ./target/lookup-1.0-jar-with-dependencies.jar -c ../examples/lookup-config.yml
 ```
 
 ### Step 2
@@ -43,7 +43,7 @@ Run the indexing process. Issue the following HTTP request:
 
 ```
 curl --request POST \
-  --url https://localhost:8082/api/index/run \
+  --url http://localhost:8082/api/index/run \
   --header 'Content-Type: multipart/form-data' \
   --form config=@index-config.yml \
   --form values=http://dbpedia.org/resource/Berlin,http://dbpedia.org/resource/Leipzig,http://dbpedia.org/resource/Hamburg
