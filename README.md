@@ -16,15 +16,15 @@ A Lucene index can be understood as a collection of documents. Each document has
 
 ## Quickstart Example
 
-The [examples folder]([../examples/](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples)) contains configuration files for a search index over a part of the **DBpedia knowledge graph** (using [https://dbpedia.org/sparql](https://dbpedia.org/sparql)). 
+The [examples folder]([[../examples/](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples) contains configuration files for a search index over a part of the **DBpedia knowledge graph** (using [https://dbpedia.org/sparql](https://dbpedia.org/sparql)). 
 
 It contains 
 
-* a configuration file for the lookup server instance ([lookup-config.yml](../examples/lookup-config.yml)) 
-* a configuration file for the indexing request ([dbpedia-resource-indexer.yml](../examples/indexing/dbpedia-resource-indexer.yml))
+* a configuration file for the lookup server instance ([lookup-config.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/lookup-config.yml)) 
+* a configuration file for the indexing request ([dbpedia-resource-indexer.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/indexing/dbpedia-resource-indexer.yml))
 
 ### Step 1
-Run a server instance using the provided configuration in [lookup-config.yml](../examples/lookup-config.yml).
+Run a server instance using the provided configuration in [lookup-config.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/lookup-config.yml).
 
 You can run the *"Launch Lookup Server"* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
 Alternatively, you can use maven to build a `.jar` file by issuing
