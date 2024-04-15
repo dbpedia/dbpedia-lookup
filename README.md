@@ -16,7 +16,7 @@ A Lucene index can be understood as a collection of documents. Each document has
 
 ## Quickstart Example
 
-The [examples folder](../examples/) contains configuration files for a search index over a part of the **DBpedia knowledge graph** (using [https://dbpedia.org/sparql](https://dbpedia.org/sparql)). 
+The [examples folder]([../examples/](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples)) contains configuration files for a search index over a part of the **DBpedia knowledge graph** (using [https://dbpedia.org/sparql](https://dbpedia.org/sparql)). 
 
 It contains 
 
