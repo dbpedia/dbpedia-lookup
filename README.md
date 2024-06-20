@@ -20,7 +20,7 @@ The [examples folder](https://github.com/dbpedia/dbpedia-lookup/tree/main/exampl
 
 It contains 
 
-* a configuration file for the lookup server instance ([lookup-config.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/lookup-config.yml)) 
+* a configuration file for the lookup server instance ([config.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/config.yml)) 
 * a configuration file for the indexing request ([dbpedia-resource-indexer.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/indexing/dbpedia-resource-indexer.yml))
 
 ### Step 1
