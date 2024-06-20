@@ -24,7 +24,7 @@ It contains
 * a configuration file for the indexing request ([dbpedia-resource-indexer.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/indexing/dbpedia-resource-indexer.yml))
 
 ### Step 1
-Run a server instance using the provided configuration in [lookup-config.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/lookup-config.yml).
+Run a server instance using the provided configuration in [config.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/config.yml).
 
 You can run the *"Launch Lookup Server"* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
 Alternatively, you can use maven to build a `.jar` file by issuing
@@ -34,7 +34,7 @@ mvn package
 ```
 and then running the resulting `lookup-1.0-jar-with-dependencies.jar` file via
 ```
-java -jar ./target/lookup-1.0-jar-with-dependencies.jar -c ../examples/lookup-config.yml
+java -jar ./target/lookup-1.0-jar-with-dependencies.jar -c ../examples/config.yml
 ```
 
 ### Step 2
