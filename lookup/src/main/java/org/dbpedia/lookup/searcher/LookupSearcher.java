@@ -245,7 +245,20 @@ public class LookupSearcher {
 				List<String> tokens;
 
 				if (fields[i].tokenize()) {
-					tokens = analyze(query, analyzer);
+
+					if(isExact) {
+						
+						tokens = new ArrayList<String>();
+						String[] exactTokens = query.split(" ");
+						
+						for(int t = 0; t < exactTokens.length; t++) {
+							tokens.add(exactTokens[t]);
+						}
+					}
+					else {
+						tokens = analyze(query, analyzer);
+					}
+
 				} else {
 					tokens = new ArrayList<String>();
 
