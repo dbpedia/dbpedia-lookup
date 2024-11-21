@@ -158,7 +158,9 @@ public class LuceneIndexWriter {
 
 			indexField(lastDocument, path, lastValue);
 
-			if (k % config.getLogInterval() == 0) {
+			if(config.getLogInterval() == 0) {
+				logger.info("Binding " + k + ": [" + lastDocument + "] -> \"" + lastValue + "\"");
+			} else if (k % config.getLogInterval() == 0) {
 				logger.info("Binding " + k + ": [" + lastDocument + "] -> \"" + lastValue + "\"");
 			}
 

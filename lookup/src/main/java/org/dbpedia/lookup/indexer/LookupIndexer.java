@@ -283,7 +283,7 @@ public class LookupIndexer {
 		logger.info("Connecting to TDB2 data set graph...");
 
 		// Connect to TDB2 graph on disk
-		DatasetGraph datasetGraph = DatabaseMgr.connectDatasetGraph(config.getDataPath());
+		DatasetGraph datasetGraph = DatabaseMgr.connectDatasetGraph(config.getTdbPath());
 
 		// Do the indexing
 		indexData(DatasetFactory.wrap(datasetGraph), config);
