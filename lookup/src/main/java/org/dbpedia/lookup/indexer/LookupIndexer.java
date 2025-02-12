@@ -86,7 +86,6 @@ public class LookupIndexer {
 			indexWriter.finish();
 
 		} catch (Exception e) {
-			indexWriter.cleanUp();
 			throw (e);
 		}
 	}
@@ -141,6 +140,15 @@ public class LookupIndexer {
 		}
 	}
 
+	/**
+	 * Drops documents from the index based on the specified values.
+	 * 
+	 * @param values An array of URIs representing the documents to drop from the index.
+	 */
+	public void drop(String[] values) {
+		indexWriter.drop(values);
+	}
+	
 	/**
 	 * Indexing based on an already existing SPARQL endpoint
 	 */
@@ -368,6 +376,7 @@ public class LookupIndexer {
 
 		return filesToLoad;
 	}
+
 
 	
 }

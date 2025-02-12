@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "org.dbpedia.lookup.Main",
             "projectName": "lookup",
-            "args": "-c ./examples/config.yml"
+            "args": "-c C:/Users/janfo/Documents/Work/databus/search/servlet-config.yml" // ./examples/config.yml"
         }
     ]
 }

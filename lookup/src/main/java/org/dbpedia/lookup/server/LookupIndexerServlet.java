@@ -29,6 +29,8 @@ public class LookupIndexerServlet extends HttpServlet {
 	final static Logger logger = LoggerFactory.getLogger(LookupIndexerServlet.class);
 
 	final static String PATH_RUN = "/run";
+	
+	final static String PATH_DELETE = "/delete";
 
 	final static String PATH_CLEAR = "/clear";
 	
@@ -67,9 +69,43 @@ public class LookupIndexerServlet extends HttpServlet {
 			doRun(req, res);
 		}
 
+		if(PATH_DELETE.equals(pathInfo)) {
+			doDrop(req, res);
+		}
+			
 		if(PATH_CLEAR.equals(pathInfo)) {
 			doClear(req, res);
 		}
+	}
+
+	private void doDrop(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+		// Set up the temporary directory for storing uploaded files
+		Path tempDirectory = Files.createTempDirectory("multipart");
+		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(tempDirectory.toString());
+
+		// Set the multipart configuration for the request
+		req.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT, multipartConfigElement);
+		
+		// Get the files from the multipart form
+		Collection<Part> parts = req.getParts();
+
+		String[] values = null;
+
+		// Process files
+		for (Part part : parts) {
+			String partName = part.getName();
+			byte[] partBytes = part.getInputStream().readAllBytes();
+			String partValue = new String(partBytes, java.nio.charset.StandardCharsets.UTF_8);
+
+			if(FORM_FIELD_VALUES.equals(partName)) {
+				values = partValue.split(",");
+			}
+		}
+
+		
+		indexer.drop(values);
+		searcher.refresh();
+		res.setStatus(HttpServletResponse.SC_OK);
 	}
 
 	private void doClear(HttpServletRequest req, HttpServletResponse res) {

@@ -1,6 +1,5 @@
 package org.dbpedia.lookup.indexer;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,8 +44,6 @@ public class LuceneIndexWriter {
 	private String lastDocument = null;
 
 	private String lastValue = null;
-
-	private File stagingDirectory = null;
 
 	private LookupConfig config;
 
@@ -126,18 +123,6 @@ public class LuceneIndexWriter {
 
 	}
 	
-
-	public void cleanUp() {
-		if(this.stagingDirectory != null) {
-			for(File file : this.stagingDirectory.listFiles()) {
-				file.delete();	
-			}
-
-			this.stagingDirectory.delete();
-			this.stagingDirectory = null;
-		}
-	}
-
 	public void indexResult(ResultSet result, IndexField path) {
 
 		int k = 0;
@@ -359,6 +344,35 @@ public class LuceneIndexWriter {
 
 	public void test() {
 
+	}
+
+	/**
+	 * Drops documents from the index based on the specified values.
+	 * 
+	 * @param values An array of URIs representing the documents to drop from the index.
+	 */
+	public void drop(String[] values) {
+		if (values == null || values.length == 0) {
+			logger.info("No values provided for drop operation.");
+			return;
+		}
+
+		try {
+			for (String value : values) {
+				logger.info("Dropping document with value: " + value);
+				
+				// Create a term query to find the document by the FIELD_DOCUMENT_ID
+				Term term = new Term(Constants.FIELD_DOCUMENT_ID, value);
+				indexWriter.deleteDocuments(term);
+			}
+
+			// Commit the changes to the index
+			commit();
+			logger.info("Drop operation completed successfully.");
+
+		} catch (IOException e) {
+			logger.error("An error occurred while dropping documents from the index.", e);
+		}
 	}
 
 }
