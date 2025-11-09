@@ -26,7 +26,7 @@ It contains
 ### Step 1
 Run a server instance using the provided configuration in [config.yml](https://github.com/dbpedia/dbpedia-lookup/tree/main/examples/config.yml).
 
-You can run the *"Launch Lookup Server"* setup from the [launch-config.json](../.vscode/launch.json) in Visual Studio Code.
+You can run the *"Launch Lookup Server"* setup from the [launch.json](https://github.com/dbpedia/dbpedia-lookup/blob/main/.vscode/launch.json) in Visual Studio Code.
 Alternatively, you can use maven to build a `.jar` file by issuing
 
 ```
