@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 
-import org.apache.lucene.index.IndexWriter;
 import org.dbpedia.lookup.config.IndexConfig;
 import org.dbpedia.lookup.indexer.LookupIndexer;
 import org.dbpedia.lookup.searcher.LookupSearcher;
@@ -38,8 +37,6 @@ public class LookupIndexerServlet extends HttpServlet {
 
 	final static String FORM_FIELD_CONFIG = "config";
 
-	private IndexWriter indexWriter;
-
 	private LookupIndexer indexer;
 
 	private LookupSearcher searcher;
@@ -48,16 +45,6 @@ public class LookupIndexerServlet extends HttpServlet {
 	public void init() throws ServletException {
 		indexer = (LookupIndexer)getServletContext().getAttribute("INDEXER");
 		searcher = (LookupSearcher)getServletContext().getAttribute("SEARCHER");
-	}
-
-	@Override
-	public void destroy() {
-		try {
-			indexWriter.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		super.destroy();
 	}
 
 	@Override
