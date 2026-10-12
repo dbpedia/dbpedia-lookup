@@ -186,7 +186,17 @@ public class LuceneIndexWriter {
 			
 			switch (fieldType) {
 				case Constants.CONFIG_FIELD_TYPE_NUMERIC:
-					long value = Long.parseLong(valueString);
+					long value;
+					try {
+						value = Long.parseLong(valueString);
+					} catch (NumberFormatException e) {
+						// Real-world RDF data is not guaranteed to match a field's configured
+						// type; one malformed numeric literal must not abort the whole
+						// indexing run (indexResult()'s caller has no try/catch around it).
+						logger.warn("Skipping non-numeric value for field '" + field + "' on document '"
+							+ documentId + "': '" + valueString + "'");
+						break;
+					}
 					doc.removeFields(field);
 					doc.add(new StoredField(field, value));
 					doc.add(new LongPoint(field, value));
