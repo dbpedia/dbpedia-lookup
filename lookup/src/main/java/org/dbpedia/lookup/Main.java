@@ -108,7 +108,12 @@ public class Main {
 
             if (cmd.hasOption(CLI_OPT_PORT)) {
                 String portString = cmd.getOptionValue(CLI_OPT_PORT);
-                port = Integer.parseInt(portString);
+                try {
+                    port = Integer.parseInt(portString);
+                } catch (NumberFormatException e2) {
+                    log.error("Invalid value for --" + CLI_OPT_PORT_LONG + ": '" + portString
+                        + "' is not a number, using default port " + port);
+                }
             }
 
         } catch (org.apache.commons.cli.ParseException e1) {
