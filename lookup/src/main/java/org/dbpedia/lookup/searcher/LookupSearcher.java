@@ -456,8 +456,14 @@ public class LookupSearcher {
 
 		ArrayList<ScoredDocument> resultList = new ArrayList<ScoredDocument>();
 
-		if (maxResults == 0) {
-			
+		if (maxResults <= 0) {
+			// maxResults is set directly from the "maxResults" request parameter
+			// (QuerySettings.parse -> RequestUtils.getIntParameter) with no lower-bound
+			// check, so a negative value reaches this point unmodified. Lucene's
+			// IndexSearcher.search(Query, int) requires n > 0 and otherwise throws an
+			// unchecked IllegalArgumentException, which the calling servlet does not
+			// catch. Treat any non-positive value the same as the existing "count only"
+			// case for 0 instead of letting it reach searcher.search().
 			int hitCount = searcher.count(query);
 
 			ScoredDocument scoredDocument = new ScoredDocument();
