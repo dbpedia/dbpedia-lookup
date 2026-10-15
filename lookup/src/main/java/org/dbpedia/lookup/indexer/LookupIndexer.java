@@ -332,9 +332,9 @@ public class LookupIndexer {
 							TimeUnit.MILLISECONDS.toSeconds(elapsed) -
 									TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(elapsed))));
 				});
-
-				dataset.close();
 			}
+
+			dataset.close();
 		}
 	}
 
