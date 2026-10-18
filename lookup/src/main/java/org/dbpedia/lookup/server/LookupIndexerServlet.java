@@ -146,6 +146,11 @@ public class LookupIndexerServlet extends HttpServlet {
 			}
 		}
 
+		if (indexConfig == null) {
+			res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing required form field: " + FORM_FIELD_CONFIG);
+			return;
+		}
+
 		indexer.run(indexConfig, values);
 		searcher.refresh();
 
