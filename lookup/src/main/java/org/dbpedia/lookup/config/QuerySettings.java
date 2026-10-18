@@ -101,7 +101,10 @@ public class QuerySettings {
 
 		exactMatchBoost = RequestUtils.getFloatParameter(req, EXACT_MATCH_BOOST, exactMatchBoost);
 		prefixMatchBoost = RequestUtils.getFloatParameter(req, PREFIX_MATCH_BOOST, prefixMatchBoost);
-		maxResults = RequestUtils.getIntParameter(req, MAX_RESULTS, maxResults);
+		int requestedMaxResults = RequestUtils.getIntParameter(req, MAX_RESULTS, maxResults);
+		if (requestedMaxResults > 0) {
+			maxResults = requestedMaxResults;
+		}
 
 		if (maxResultsCap > 0) {
 			maxResults = Math.min(maxResults, maxResultsCap);
