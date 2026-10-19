@@ -267,7 +267,7 @@ public class LookupSearcherServlet extends HttpServlet {
 				try {
 					fieldQuery = URLDecoder.decode(fieldQuery, "UTF-8");	
 					result.put(queryField, fieldQuery);
-				} catch (UnsupportedEncodingException e) {
+				} catch (IllegalArgumentException | UnsupportedEncodingException e) {
 					result.put(queryField, fieldQuery);
 				}
 				continue;

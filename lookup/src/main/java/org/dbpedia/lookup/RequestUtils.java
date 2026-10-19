@@ -18,7 +18,7 @@ public class RequestUtils {
 				try {
 					return URLDecoder.decode(result, "UTF-8");	
 					
-				} catch (UnsupportedEncodingException e) {
+				} catch (IllegalArgumentException | UnsupportedEncodingException e) {
 					return result;
 				}
 			}
