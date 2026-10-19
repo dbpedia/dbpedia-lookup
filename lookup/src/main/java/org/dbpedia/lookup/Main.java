@@ -131,7 +131,8 @@ public class Main {
 
         if (resourceBasePath == null) {
             File configFile = new File(configPath);
-            resourceBasePath = configFile.getParent().toString();
+            String configParent = configFile.getParent();
+            resourceBasePath = (configParent != null) ? configParent : ".";
         }
        
         IndexWriterConfig indexWriterConfig = new IndexWriterConfig(createAnalyzer(lookupConfig));
